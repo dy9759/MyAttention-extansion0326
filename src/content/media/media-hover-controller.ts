@@ -468,7 +468,7 @@ export class MediaHoverController {
     if (detail?.group) {
       this.options.onMediaSaved?.(detail.group);
     }
-    showToast('SaySoAttention 已记录');
+    showToast('SaySo-attention 已记录');
   }
 
   private async captureMediaFromContextMenu(
@@ -570,7 +570,7 @@ export class MediaHoverController {
 
     const metadata = extractMediaMetadata(target);
     if (!metadata) {
-      showToast('SaySoAttention 记录失败');
+      showToast('SaySo-attention 记录失败');
       return;
     }
 
@@ -683,14 +683,14 @@ export class MediaHoverController {
       if (detail?.group) {
         this.options.onMediaSaved?.(detail.group);
       }
-      showToast('SaySoAttention 已记录');
+      showToast('SaySo-attention 已记录');
     } catch (error) {
       if (isExtensionContextInvalidatedError(error)) {
         Logger.warn('[MediaHover] 保存媒体跳过：扩展上下文已失效');
         return;
       }
       Logger.error('[MediaHover] 保存媒体失败:', error);
-      showToast('SaySoAttention 记录失败');
+      showToast('SaySo-attention 记录失败');
     } finally {
       this.overlay.setBusy(false);
     }

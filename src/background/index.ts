@@ -709,23 +709,23 @@ async function refreshContextMenus(): Promise<void> {
 
     await createContextMenu({
       id: CONTEXT_MENU_IDS.SELECTION,
-      title: '保存选中文本到 SaySoAttention',
+      title: '保存选中文本到 SaySo-attention',
       contexts: ['selection'],
     });
     await createContextMenu({
       id: CONTEXT_MENU_IDS.PAGE,
-      title: '保存当前页面片段到 SaySoAttention',
+      title: '保存当前页面片段到 SaySo-attention',
       contexts: ['page'],
     });
     await createContextMenu({
       id: CONTEXT_MENU_IDS.LINK,
-      title: '保存链接文本到 SaySoAttention',
+      title: '保存链接文本到 SaySo-attention',
       contexts: ['link'],
     });
     if (webCapture.mediaEnabled !== false) {
       await createContextMenu({
         id: CONTEXT_MENU_IDS.MEDIA,
-        title: '保存媒体到 SaySoAttention',
+        title: '保存媒体到 SaySo-attention',
         contexts: ['image', 'video', 'audio'],
       });
     }
@@ -911,7 +911,7 @@ async function handleContextMenuClick(
  * 初始化应用
  */
 async function initialize(): Promise<void> {
-  Logger.info('[Background] 初始化 SaySoAttention 后台服务');
+  Logger.info('[Background] 初始化 SaySo-attention 后台服务');
 
   try {
     // 初始化设置

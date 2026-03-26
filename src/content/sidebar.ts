@@ -70,7 +70,7 @@ function createCloseIcon(): string {
  * 获取扩展名称
  */
 function getExtensionName(): string {
-  return getSafeI18nMessage('extensionName', 'SaySoAttention');
+  return getSafeI18nMessage('extensionName', 'SaySo-attention');
 }
 
 /**
