@@ -266,15 +266,10 @@ function renderSupportedPlatforms(): void {
 
   container.innerHTML = '';
   supportedPlatforms.forEach((platform) => {
-    const row = document.createElement('div');
-    row.className = 'border border-gray-100 rounded-md px-2 py-1.5 bg-gray-50';
-
     const badge = document.createElement('span');
     badge.className = `platform-tag platform-${platform.id}`;
     badge.textContent = platform.label;
-
-    row.appendChild(badge);
-    container.appendChild(row);
+    container.appendChild(badge);
   });
 }
 
