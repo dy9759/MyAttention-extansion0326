@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaySoAttention</title>
+  <link rel="stylesheet" href="../css/fallback_popup.css">
+</head>
+<body>
+  <div id="first-open-overlay" class="first-open-overlay" hidden aria-hidden="true">
+    <button
+      id="first-open-overlay-close"
+      class="first-open-overlay-close"
+      type="button"
+      aria-label="关闭首次引导"
+    >×</button>
+    <div class="first-open-overlay-content">
+      <div class="first-open-overlay-item">
+        <span class="first-open-overlay-index">1</span>
+        <p class="first-open-overlay-text">随时记录网页 ChatBot 与你的讨论</p>
+      </div>
+      <div class="first-open-overlay-item">
+        <span class="first-open-overlay-index">2</span>
+        <p class="first-open-overlay-text">随时记录你的划词、停留，与多媒体内容</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 头部区域 - 居中品牌展示 -->
+  <div class="header">
+    <img class="logo" src="../icons/logo_128.png" alt="SaySoAttention">
+    <div class="title-row">
+      <span class="title">SaySoAttention</span>
+      <span id="version-badge" class="version-badge"></span>
+    </div>
+    <div class="subtitle" data-i18n="fallbackSubtitle">每一条 AI 对话，无感秒存</div>
+  </div>
+
+  <!-- 当前页面提示 -->
+  <div class="tip">
+    <div class="tip-title" data-i18n="fallbackTip">💡 当前页面不在支持列表</div>
+    <div class="tip-desc" data-i18n="fallbackTipDesc">请打开支持的 AI 聊天网站继续使用</div>
+  </div>
+
+  <!-- 使用步骤 -->
+  <div class="steps-section">
+    <div class="section-title" data-i18n="fallbackHowToStart">如何开始</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-main" data-i18n="fallbackStep1">自动保存 AI 对话</div>
+          <div class="step-desc" data-i18n="fallbackStep1Desc">在 AI 平台自然对话，或打开历史对话</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-main" data-i18n="fallbackStep2">管理 AI 记忆列表</div>
+          <div class="step-desc" data-i18n="fallbackStep2Desc">任意网页点击插件图标/悬浮球，打开主界面</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 官网链接 -->
+  <!-- 官网链接已移除 -->
+
+  <script>
+    const FIRST_OPEN_WELCOME_PENDING_KEY = 'first_open_welcome_pending';
+
+    function setFirstOpenOverlayVisible(visible) {
+      const overlay = document.getElementById('first-open-overlay');
+      if (!overlay) {
+        return;
+      }
+      overlay.hidden = !visible;
+      overlay.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    }
+
+    function dismissFirstOpenOverlay() {
+      setFirstOpenOverlayVisible(false);
+      try {
+        chrome.storage.local.set({ [FIRST_OPEN_WELCOME_PENDING_KEY]: false });
+      } catch (_) {}
+    }
+
+    try {
+      const manifest = chrome.runtime.getManifest();
+      const el = document.getElementById('version-badge');
+      if (el && manifest && manifest.version) {
+        el.textContent = `v${manifest.version}`;
+      }
+    } catch (_) {}
+
+    try {
+      const closeButton = document.getElementById('first-open-overlay-close');
+      closeButton?.addEventListener('click', dismissFirstOpenOverlay);
+      chrome.storage.local.get([FIRST_OPEN_WELCOME_PENDING_KEY], (result) => {
+        setFirstOpenOverlayVisible(result?.[FIRST_OPEN_WELCOME_PENDING_KEY] === true);
+      });
+    } catch (_) {}
+  </script>
+</body>
+</html>

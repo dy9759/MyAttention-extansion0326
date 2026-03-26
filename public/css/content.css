@@ -1,0 +1,286 @@
+/* 悬浮标签样式  */
+.sayso-float {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  gap: 8px;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0px 4px 20px 0px rgba(2, 4, 26, 0.16);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+  transition: all 0.35s cubic-bezier(.33, 1, .68, 1);
+  animation: floatIn 0.35s cubic-bezier(.33, 1, .68, 1);
+  cursor: grab;
+  box-sizing: border-box;
+  border: none;
+}
+
+/* 进入动画 */
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  70% {
+    transform: translateY(2px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 悬停效果 */
+.sayso-float:hover {
+  box-shadow: 0px 6px 24px 0px rgba(2, 4, 26, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 贴边半隐藏状态 - 右边 */
+.sayso-float.edge-docked {
+  transform: translateX(calc(100% - 40px));
+  transition: transform 0.35s cubic-bezier(.33, 1, .68, 1);
+  border-radius: 18px 0 0 18px;
+  padding-left: 10px;
+  padding-right: 14px;
+  animation: fadeIn 0.3s ease;
+  /* 贴边状态使用纯淡入，避免 transform 冲突 */
+}
+
+/* 贴边半隐藏状态 - 左边 */
+.sayso-float.edge-docked.left {
+  transform: translateX(calc(-100% + 40px));
+  border-radius: 0 18px 18px 0;
+  flex-direction: row-reverse;
+  padding-left: 14px;
+  padding-right: 10px;
+}
+
+/* 贴边半隐藏状态悬停时完全显示 */
+.sayso-float.edge-docked:hover {
+  transform: translateX(0);
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+/* 贴边半隐藏状态下的文字隐藏 */
+.sayso-float.edge-docked .sayso-status {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* 贴边半隐藏状态悬停时文字显示 */
+.sayso-float.edge-docked:hover .sayso-status {
+  opacity: 1;
+  width: auto;
+}
+
+/* 贴边半隐藏状态下的保存按钮隐藏 */
+.sayso-float.edge-docked .sayso-save {
+  opacity: 0;
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* 贴边半隐藏状态悬停时保存按钮显示 */
+.sayso-float.edge-docked:hover .sayso-save {
+  opacity: 1;
+  width: auto;
+  padding: 4px 5px;
+}
+
+/* 拖动时的样式 */
+.sayso-float.dragging {
+  opacity: 0.9;
+  transform: scale(1.02);
+  box-shadow: 0px 8px 32px 0px rgba(2, 4, 26, 0.24);
+  cursor: grabbing;
+  transition: none;
+}
+
+/* 悬浮标签图标容器 - 用于放置徽章 */
+.sayso-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* 状态徽章 - logo 右下角的小圆点 */
+.sayso-badge {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  box-sizing: content-box;
+  transition: background-color 0.3s ease;
+}
+
+.sayso-status {
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.sayso-save {
+  cursor: pointer;
+  color: #3884ff;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 5px;
+  margin-left: -4px;
+  margin-right: -5px;
+  /* 抵消右侧边距，与容器边缘对齐 */
+  border-radius: 5px;
+}
+
+.sayso-save:hover {
+  color: #0a84ff;
+  background: rgba(56, 132, 255, 0.1);
+}
+
+/* 状态样式 - 自动保存（绿色） */
+.sayso-auto-save .sayso-badge {
+  background-color: #28cd41;
+}
+
+/* 状态样式 - 手动保存（橙色） */
+.sayso-manual-save .sayso-badge {
+  background-color: #ff9500;
+}
+
+/* 状态样式 - 成功（绿色） */
+.sayso-success .sayso-badge {
+  background-color: #28cd41;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.sayso-fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+/* 拖拽贴边视觉引导提示 */
+.edge-guide {
+  position: fixed;
+  top: 0;
+  width: 4px;
+  height: 100vh;
+  background: linear-gradient(to bottom,
+      rgba(56, 132, 255, 0.8) 0%,
+      rgba(56, 132, 255, 0.6) 50%,
+      rgba(56, 132, 255, 0.8) 100%);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.edge-guide.left {
+  left: 0;
+  border-radius: 0 2px 2px 0;
+}
+
+.edge-guide.right {
+  right: 0;
+  border-radius: 2px 0 0 2px;
+}
+
+.edge-guide.active {
+  opacity: 1;
+  animation: edgePulse 1s ease-in-out infinite;
+}
+
+/* 边缘引导脉冲动画 */
+@keyframes edgePulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleX(1.5);
+  }
+}
+
+/* 拖拽时接近边缘的悬浮标签样式 */
+.sayso-float.near-edge {
+  box-shadow: 0px 4px 20px 0px rgba(56, 132, 255, 0.3);
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .sayso-float {
+    background: rgba(26, 26, 26, 0.92);
+    color: rgba(255, 255, 255, 0.87);
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  .sayso-float:hover {
+    box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.6);
+  }
+
+  .sayso-float.dragging {
+    box-shadow: 0px 8px 32px 0px rgba(0, 0, 0, 0.7);
+  }
+
+  .sayso-badge {
+    border-color: #1a1a1a;
+  }
+
+  .sayso-save {
+    color: #0a84ff;
+  }
+
+  .sayso-save:hover {
+    color: #3884ff;
+    background: rgba(10, 132, 255, 0.15);
+  }
+}

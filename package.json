@@ -1,0 +1,52 @@
+{
+  "name": "saysoattention",
+  "version": "1.2.0",
+  "description": "SaySoAttention - Chrome Extension",
+  "author": "chauncey",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --mode development --watch",
+    "build": "vite build --mode production && vite build --mode production --config vite.content.config.ts && npm run verify:sw && npm run verify:content-script",
+    "build:chrome": "npm run build && node scripts/build.js",
+    "verify:sw": "node scripts/verify-sw-build.js",
+    "verify:content-script": "node scripts/verify-content-script-build.js",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\" \"src/**/*.css\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"src/**/*.tsx\" \"src/**/*.css\"",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "local-store:install": "npm --prefix ../SaySo-local-store install",
+    "local-store:start": "npm --prefix ../SaySo-local-store start",
+    "prepare": "npm run build",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^7.6.0",
+    "@typescript-eslint/parser": "^7.6.0",
+    "@vitejs/plugin-legacy": "^5.4.0",
+    "eslint": "^8.57.0",
+    "jsdom": "^28.1.0",
+    "prettier": "^3.1.0",
+    "terser": "^5.4.0",
+    "typescript": "^5.4.2",
+    "vite": "^5.2.0",
+    "vite-plugin-static-copy": "^0.17.0",
+    "vitest": "^1.3.0"
+  },
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "sayso",
+    "claude",
+    "chatgpt"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

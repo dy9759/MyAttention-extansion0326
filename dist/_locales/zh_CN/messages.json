@@ -1,0 +1,386 @@
+{
+   "about": {
+      "message": "关于"
+   },
+   "ai": {
+      "message": "AI"
+   },
+   "applyFilter": {
+      "message": "筛选"
+   },
+   "author": {
+      "message": "作者"
+   },
+   "autoSaveConversations": {
+      "message": "自动保存对话"
+   },
+   "autoSaveDescription": {
+      "message": "在支持的AI对话页面自动保存对话记录"
+   },
+   "autoSaving": {
+      "message": "自动记忆"
+   },
+   "basicSettings": {
+      "message": "基础设置"
+   },
+   "calculating": {
+      "message": "计算中..."
+   },
+   "cancel": {
+      "message": "取消"
+   },
+   "cancelButton": {
+      "message": "取消"
+   },
+   "cancelMultiSelectMode": {
+      "message": "取消多选模式"
+   },
+   "clearData": {
+      "message": "清空数据"
+   },
+   "clearDataWarning": {
+      "message": "此操作将永久删除所有保存的对话记录，且无法恢复。"
+   },
+   "clearDate": {
+      "message": "清空日期"
+   },
+   "clearFailed": {
+      "message": "清空失败"
+   },
+   "clearFilter": {
+      "message": "清空筛选"
+   },
+   "clearSearch": {
+      "message": "清空搜索"
+   },
+   "clearSuccess": {
+      "message": "清空成功"
+   },
+   "clearing": {
+      "message": "清空中..."
+   },
+   "clickToOpenManager": {
+      "message": "点击打开记忆管理器，拖动调整位置"
+   },
+   "confirmClear": {
+      "message": "确认清空"
+   },
+   "confirmClearAllData": {
+      "message": "确认清空所有数据？"
+   },
+   "confirmDelete": {
+      "message": "确认删除"
+   },
+   "contactUs": {
+      "message": "联系我们"
+   },
+   "copyConversation": {
+      "message": "复制对话"
+   },
+   "copySuccess": {
+      "message": "复制成功"
+   },
+   "dateRange": {
+      "message": "日期范围"
+   },
+   "delete": {
+      "message": "删除"
+   },
+   "deleteConfirmMessage": {
+      "message": "确定要删除这个对话记忆吗？删除后将无法恢复。"
+   },
+   "editConversationTitle": {
+      "message": "修改对话标题"
+   },
+   "endDate": {
+      "message": "结束日期"
+   },
+   "export": {
+      "message": "导出"
+   },
+   "exportData": {
+      "message": "导出数据"
+   },
+   "exportFailed": {
+      "message": "导出失败"
+   },
+   "exportFilterResults": {
+      "message": "导出筛选结果"
+   },
+   "exportMerged": {
+      "message": "合并导出"
+   },
+   "exportMergedDocument": {
+      "message": "合并为一个文档"
+   },
+   "exportMultipleFiles": {
+      "message": "导出多个文件"
+   },
+   "exportSelected": {
+      "message": "导出选中({count})"
+   },
+   "exportSelectedTitle": {
+      "message": "导出{count}条选中的对话"
+   },
+   "exportSeparate": {
+      "message": "分别导出"
+   },
+   "exportSuccess": {
+      "message": "导出成功"
+   },
+   "exporting": {
+      "message": "导出中..."
+   },
+   "extensionContextInvalid": {
+      "message": "扩展上下文已失效，请刷新页面"
+   },
+   "extensionDescription": {
+      "message": "帮助用户自动保存 ChatGPT、Gemini、Claude 等 AI 平台聊天记录"
+   },
+   "extensionName": {
+      "message": "MyAttention-extention"
+   },
+   "fallbackHowToStart": {
+      "message": "如何开始"
+   },
+   "fallbackMessage": {
+      "message": "当前页面不支持侧边栏功能"
+   },
+   "fallbackStep1": {
+      "message": "自动保存 AI 对话"
+   },
+   "fallbackStep1Desc": {
+      "message": "在 AI 平台自然对话，或打开历史对话"
+   },
+   "fallbackStep2": {
+      "message": "管理 AI 记忆列表"
+   },
+   "fallbackStep2Desc": {
+      "message": "任意网页点击插件图标/悬浮球，打开主界面"
+   },
+   "fallbackSubtitle": {
+      "message": "每一条 AI 对话，无感秒存"
+   },
+   "fallbackTip": {
+      "message": "💡 当前页面不在支持列表"
+   },
+   "fallbackTipDesc": {
+      "message": "请打开支持的 AI 聊天网站继续使用"
+   },
+   "filter": {
+      "message": "筛选"
+   },
+   "foundItems": {
+      "message": "找到 {count} 条"
+   },
+   "hoursAgo": {
+      "message": "小时前"
+   },
+   "inputNewTitle": {
+      "message": "输入新标题"
+   },
+   "justNow": {
+      "message": "刚刚"
+   },
+   "lastMonth": {
+      "message": "最近一月"
+   },
+   "lastWeek": {
+      "message": "最近一周"
+   },
+   "loadingMemories": {
+      "message": "加载记忆中..."
+   },
+   "manualSave": {
+      "message": "手动保存"
+   },
+   "memories": {
+      "message": "记忆"
+   },
+   "minutesAgo": {
+      "message": "分钟前"
+   },
+   "moreActions": {
+      "message": "更多操作"
+   },
+   "multiSelect": {
+      "message": "多选"
+   },
+   "multiSelectMode": {
+      "message": "多选模式"
+   },
+   "noContent": {
+      "message": "无内容"
+   },
+   "noMemoriesSaved": {
+      "message": "还没有保存任何记忆"
+   },
+   "noTitle": {
+      "message": "无标题对话"
+   },
+   "openFullPage": {
+      "message": "打开完整界面"
+   },
+   "openOriginalPage": {
+      "message": "跳转原网页"
+   },
+   "platformSource": {
+      "message": "平台来源"
+   },
+   "productWebsite": {
+      "message": "产品官网"
+   },
+   "refreshPageAfterClear": {
+      "message": "清空完成后，请刷新网页以确保数据同步。"
+   },
+   "remove": {
+      "message": "移除"
+   },
+   "save": {
+      "message": "保存"
+   },
+   "saveSuccess": {
+      "message": "保存成功"
+   },
+   "saving": {
+      "message": "记忆中..."
+   },
+   "searchNoResults": {
+      "message": "未找到匹配的对话"
+   },
+   "searchNoResultsHint": {
+      "message": "尝试使用其他关键词搜索"
+   },
+   "searchPlaceholder": {
+      "message": "搜索对话标题或内容..."
+   },
+   "selectPlatforms": {
+      "message": "点击选择平台"
+   },
+   "settings": {
+      "message": "设置"
+   },
+   "snippets": {
+      "message": "片段"
+   },
+   "snippetsDescription": {
+      "message": "网页浏览和划词记录"
+   },
+   "loadingSnippets": {
+      "message": "加载片段中..."
+   },
+   "noSnippetsSaved": {
+      "message": "还没有保存任何片段"
+   },
+   "snippetsEmptyHint": {
+      "message": "浏览网页或划词后，记录会出现在这里"
+   },
+   "saveCurrentPage": {
+      "message": "保存当前页"
+   },
+   "currentPageStatus": {
+      "message": "当前页面状态"
+   },
+   "snippetStatusSaved": {
+      "message": "已保存"
+   },
+   "snippetStatusNotSaved": {
+      "message": "未保存"
+   },
+   "snippetSearchPlaceholder": {
+      "message": "搜索标题、正文或域名"
+   },
+   "snippetFilterAllTypes": {
+      "message": "全部类型"
+   },
+   "snippetFilterHighlights": {
+      "message": "高亮"
+   },
+   "snippetFilterDwell": {
+      "message": "停留"
+   },
+   "snippetFilterPageSave": {
+      "message": "页面保存"
+   },
+   "snippetFilterAllSources": {
+      "message": "全部来源"
+   },
+   "snippetFilterWeb": {
+      "message": "网页"
+   },
+   "snippetFilterAi": {
+      "message": "AI"
+   },
+   "snippetFilterAllTime": {
+      "message": "全部时间"
+   },
+   "snippetFilterToday": {
+      "message": "今天"
+   },
+   "snippetFilter7Days": {
+      "message": "7天"
+   },
+   "snippetFilter30Days": {
+      "message": "30天"
+   },
+   "selectedText": {
+      "message": "选中文本"
+   },
+   "contextText": {
+      "message": "上下文"
+   },
+   "webCaptureSettings": {
+      "message": "网页采集"
+   },
+   "enableWebCapture": {
+      "message": "启用网页记录"
+   },
+   "enableHighlightCapture": {
+      "message": "启用划词记录"
+   },
+   "enableDwellCapture": {
+      "message": "启用停留记录"
+   },
+   "enableContextMenuCapture": {
+      "message": "启用右键菜单保存"
+   },
+   "enableSnippetBadge": {
+      "message": "启用页面状态徽标"
+   },
+   "sidebarOpenRequested": {
+      "message": "侧边栏打开请求已发送"
+   },
+   "startDate": {
+      "message": "开始日期"
+   },
+   "storageManagement": {
+      "message": "存储管理"
+   },
+   "supportedPlatforms": {
+      "message": "支持平台"
+   },
+   "thinkingProcess": {
+      "message": "思考过程"
+   },
+   "todayNew": {
+      "message": "今日新增"
+   },
+   "totalConversations": {
+      "message": "总对话数"
+   },
+   "usedStorage": {
+      "message": "已使用存储"
+   },
+   "user": {
+      "message": "用户"
+   },
+   "version": {
+      "message": "版本"
+   },
+   "visitSupportedPages": {
+      "message": "访问支持的 AI 聊天页面开始记录对话"
+   },
+   "visitWebsite": {
+      "message": "访问官网 →"
+   }
+}

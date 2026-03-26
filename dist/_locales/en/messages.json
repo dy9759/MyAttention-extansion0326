@@ -1,0 +1,386 @@
+{
+   "about": {
+      "message": "关于"
+   },
+   "ai": {
+      "message": "AI"
+   },
+   "applyFilter": {
+      "message": "Filter"
+   },
+   "author": {
+      "message": "作者"
+   },
+   "autoSaveConversations": {
+      "message": "自动保存对话"
+   },
+   "autoSaveDescription": {
+      "message": "在支持的 AI 对话页面自动保存对话记录"
+   },
+   "autoSaving": {
+      "message": "Auto-saving"
+   },
+   "basicSettings": {
+      "message": "基础设置"
+   },
+   "calculating": {
+      "message": "计算中..."
+   },
+   "cancel": {
+      "message": "取消"
+   },
+   "cancelButton": {
+      "message": "Cancel"
+   },
+   "cancelMultiSelectMode": {
+      "message": "Cancel multi-select mode"
+   },
+   "clearData": {
+      "message": "Clear Data"
+   },
+   "clearDataWarning": {
+      "message": "此操作将永久删除所有保存的对话记录，且无法恢复。"
+   },
+   "clearDate": {
+      "message": "Clear Date"
+   },
+   "clearFailed": {
+      "message": "Clear failed"
+   },
+   "clearFilter": {
+      "message": "Clear Filter"
+   },
+   "clearSearch": {
+      "message": "Clear search"
+   },
+   "clearSuccess": {
+      "message": "Clear successful"
+   },
+   "clearing": {
+      "message": "Clearing..."
+   },
+   "clickToOpenManager": {
+      "message": "Click to open memory manager, drag to adjust position"
+   },
+   "confirmClear": {
+      "message": "确认清空"
+   },
+   "confirmClearAllData": {
+      "message": "确认清空所有数据？"
+   },
+   "confirmDelete": {
+      "message": "Confirm Delete"
+   },
+   "contactUs": {
+      "message": "Contact Us"
+   },
+   "copyConversation": {
+      "message": "Copy Conversation"
+   },
+   "copySuccess": {
+      "message": "Copy successful"
+   },
+   "dateRange": {
+      "message": "Date Range"
+   },
+   "delete": {
+      "message": "Delete"
+   },
+   "deleteConfirmMessage": {
+      "message": "Are you sure you want to delete this conversation memory? This action cannot be undone."
+   },
+   "editConversationTitle": {
+      "message": "Edit Conversation Title"
+   },
+   "endDate": {
+      "message": "End Date"
+   },
+   "export": {
+      "message": "Export"
+   },
+   "exportData": {
+      "message": "导出数据"
+   },
+   "exportFailed": {
+      "message": "Export failed"
+   },
+   "exportFilterResults": {
+      "message": "Export filter results"
+   },
+   "exportMerged": {
+      "message": "Export Merged"
+   },
+   "exportMergedDocument": {
+      "message": "合并为一个文档"
+   },
+   "exportMultipleFiles": {
+      "message": "导出多个文件"
+   },
+   "exportSelected": {
+      "message": "Export selected ({count})"
+   },
+   "exportSelectedTitle": {
+      "message": "Export {count} selected conversations"
+   },
+   "exportSeparate": {
+      "message": "Export Separately"
+   },
+   "exportSuccess": {
+      "message": "Export successful"
+   },
+   "exporting": {
+      "message": "Exporting..."
+   },
+   "extensionContextInvalid": {
+      "message": "Extension context is invalid, please refresh the page"
+   },
+   "extensionDescription": {
+      "message": "Automatically save AI chat history from ChatGPT, Gemini, Claude, and more AI chat platforms"
+   },
+   "extensionName": {
+      "message": "MyAttention-extention"
+   },
+   "fallbackHowToStart": {
+      "message": "How to Start"
+   },
+   "fallbackMessage": {
+      "message": "Sidebar is not supported on this page"
+   },
+   "fallbackStep1": {
+      "message": "Auto-save AI Conversations"
+   },
+   "fallbackStep1Desc": {
+      "message": "Chat naturally on AI platforms, or open history"
+   },
+   "fallbackStep2": {
+      "message": "Manage AI Memory List"
+   },
+   "fallbackStep2Desc": {
+      "message": "Click extension icon or floating button on any webpage"
+   },
+   "fallbackSubtitle": {
+      "message": "Auto-saves every AI conversation"
+   },
+   "fallbackTip": {
+      "message": "💡 This page is outside supported platforms"
+   },
+   "fallbackTipDesc": {
+      "message": "Open a supported AI chat website to continue"
+   },
+   "filter": {
+      "message": "Filter"
+   },
+   "foundItems": {
+      "message": "Found {count} items"
+   },
+   "hoursAgo": {
+      "message": " hours ago"
+   },
+   "inputNewTitle": {
+      "message": "Enter new title"
+   },
+   "justNow": {
+      "message": "Just now"
+   },
+   "lastMonth": {
+      "message": "Last Month"
+   },
+   "lastWeek": {
+      "message": "Last Week"
+   },
+   "loadingMemories": {
+      "message": "Loading memories..."
+   },
+   "manualSave": {
+      "message": "Manual Save"
+   },
+   "memories": {
+      "message": "Memories"
+   },
+   "minutesAgo": {
+      "message": " minutes ago"
+   },
+   "moreActions": {
+      "message": "More Actions"
+   },
+   "multiSelect": {
+      "message": "Multi-select"
+   },
+   "multiSelectMode": {
+      "message": "Multi-select mode"
+   },
+   "noContent": {
+      "message": "No Content"
+   },
+   "noMemoriesSaved": {
+      "message": "No memories saved yet"
+   },
+   "noTitle": {
+      "message": "Untitled Conversation"
+   },
+   "openFullPage": {
+      "message": "Open Full Page"
+   },
+   "openOriginalPage": {
+      "message": "Open Original Page"
+   },
+   "platformSource": {
+      "message": "Platform Source"
+   },
+   "productWebsite": {
+      "message": "Official Site"
+   },
+   "refreshPageAfterClear": {
+      "message": "清空完成后，请刷新网页以确保数据同步。"
+   },
+   "remove": {
+      "message": "Remove"
+   },
+   "save": {
+      "message": "Save"
+   },
+   "saveSuccess": {
+      "message": "Save successful"
+   },
+   "saving": {
+      "message": "Saving..."
+   },
+   "searchNoResults": {
+      "message": "No matching conversations found"
+   },
+   "searchNoResultsHint": {
+      "message": "Try using different keywords"
+   },
+   "searchPlaceholder": {
+      "message": "Search titles and content..."
+   },
+   "selectPlatforms": {
+      "message": "Click to select platforms"
+   },
+   "settings": {
+      "message": "Settings"
+   },
+   "snippets": {
+      "message": "片段"
+   },
+   "snippetsDescription": {
+      "message": "网页浏览和划词记录"
+   },
+   "loadingSnippets": {
+      "message": "加载片段中..."
+   },
+   "noSnippetsSaved": {
+      "message": "还没有保存任何片段"
+   },
+   "snippetsEmptyHint": {
+      "message": "浏览网页或划词后，记录会出现在这里"
+   },
+   "saveCurrentPage": {
+      "message": "保存当前页"
+   },
+   "currentPageStatus": {
+      "message": "当前页面状态"
+   },
+   "snippetStatusSaved": {
+      "message": "已保存"
+   },
+   "snippetStatusNotSaved": {
+      "message": "未保存"
+   },
+   "snippetSearchPlaceholder": {
+      "message": "Search title, text, or domain"
+   },
+   "snippetFilterAllTypes": {
+      "message": "All Types"
+   },
+   "snippetFilterHighlights": {
+      "message": "Highlight"
+   },
+   "snippetFilterDwell": {
+      "message": "Dwell"
+   },
+   "snippetFilterPageSave": {
+      "message": "Page Save"
+   },
+   "snippetFilterAllSources": {
+      "message": "All Sources"
+   },
+   "snippetFilterWeb": {
+      "message": "Web"
+   },
+   "snippetFilterAi": {
+      "message": "AI"
+   },
+   "snippetFilterAllTime": {
+      "message": "All Time"
+   },
+   "snippetFilterToday": {
+      "message": "Today"
+   },
+   "snippetFilter7Days": {
+      "message": "7 Days"
+   },
+   "snippetFilter30Days": {
+      "message": "30 Days"
+   },
+   "selectedText": {
+      "message": "Selected Text"
+   },
+   "contextText": {
+      "message": "Context"
+   },
+   "webCaptureSettings": {
+      "message": "网页采集"
+   },
+   "enableWebCapture": {
+      "message": "启用网页记录"
+   },
+   "enableHighlightCapture": {
+      "message": "启用划词记录"
+   },
+   "enableDwellCapture": {
+      "message": "启用停留记录"
+   },
+   "enableContextMenuCapture": {
+      "message": "启用右键菜单保存"
+   },
+   "enableSnippetBadge": {
+      "message": "启用页面状态徽标"
+   },
+   "sidebarOpenRequested": {
+      "message": "Sidebar open request sent"
+   },
+   "startDate": {
+      "message": "Start Date"
+   },
+   "storageManagement": {
+      "message": "存储管理"
+   },
+   "supportedPlatforms": {
+      "message": "支持平台"
+   },
+   "thinkingProcess": {
+      "message": "Thinking Process"
+   },
+   "todayNew": {
+      "message": "Today's New"
+   },
+   "totalConversations": {
+      "message": "Total Conversations"
+   },
+   "usedStorage": {
+      "message": "已使用存储"
+   },
+   "user": {
+      "message": "User"
+   },
+   "version": {
+      "message": "版本"
+   },
+   "visitSupportedPages": {
+      "message": "Visit supported AI chat pages to start recording conversations"
+   },
+   "visitWebsite": {
+      "message": "Visit Website →"
+   }
+}

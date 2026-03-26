@@ -1,0 +1,50 @@
+{
+  "action": {
+    "default_icon": {
+      "128": "icons/logo_128.png",
+      "16": "icons/logo_16.png",
+      "48": "icons/logo_48.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "css": ["css/content.css"],
+      "js": ["content-script.js"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  "default_locale": "en",
+  "description": "__MSG_extensionDescription__",
+  "host_permissions": ["http://127.0.0.1:1995/*"],
+  "icons": {
+    "128": "icons/logo_128.png",
+    "16": "icons/logo_16.png",
+    "48": "icons/logo_48.png"
+  },
+  "manifest_version": 3,
+  "name": "__MSG_extensionName__",
+  "permissions": ["storage", "tabs", "downloads", "contextMenus", "scripting", "alarms"],
+  "version": "1.2.0",
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "http://127.0.0.1:1995/*"
+      ],
+      "resources": [
+        "*.js",
+        "lib/*",
+        "lib/fontawesome/*",
+        "lib/fontawesome/webfonts/*",
+        "icons/*",
+        "html/popup.html",
+        "css/*"
+      ]
+    }
+  ]
+}
