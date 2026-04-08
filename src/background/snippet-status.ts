@@ -3,7 +3,7 @@ import { isAIConversationPage } from '@/core/page-scope';
 import { snippetRepository } from './repository/snippet-repository';
 import { getBackgroundWebCaptureSettings } from './settings';
 
-const AI_BADGE_COLOR = '#3b82f6';
+const AI_BADGE_COLOR = '#5e6ad2';
 const WEB_BADGE_COLOR = '#0d9488';
 
 function clearActionBadge(tabId: number): void {

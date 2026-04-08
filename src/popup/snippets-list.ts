@@ -3,10 +3,10 @@ import { formatTimestamp, escapeHtml } from './utils/index';
 import { safeGetMessage } from './chrome-safe';
 
 export const elements = {
-  snippetsContent: document.getElementById('snippets-content'),
-  snippetsLoading: document.getElementById('snippets-loading'),
-  snippetsEmpty: document.getElementById('snippets-empty'),
-  snippetsList: document.getElementById('snippets-list'),
+  snippetsContent: document.getElementById('attention-content'),
+  snippetsLoading: document.getElementById('attention-loading'),
+  snippetsEmpty: document.getElementById('attention-empty'),
+  snippetsList: document.getElementById('attention-list'),
   saveCurrentPage: document.getElementById('save-current-page-snippet') as HTMLButtonElement | null,
   currentPageStatus: document.getElementById('current-page-snippet-status'),
   toggleMergeMode: document.getElementById('toggle-snippet-merge-mode') as HTMLButtonElement | null,
@@ -17,6 +17,8 @@ export const elements = {
 interface RenderSnippetCardOptions {
   selectionMode: boolean;
   selectedSnippetIds: Set<string>;
+  /** 是否在渲染前清空容器，默认 true */
+  clearContainer?: boolean;
 }
 
 function getTypeLabel(snippet: Snippet): string {
@@ -122,7 +124,9 @@ export function renderSnippetCards(
   }
 
   const container = elements.snippetsList.querySelector('div') || elements.snippetsList;
-  container.innerHTML = '';
+  if (options.clearContainer !== false) {
+    container.innerHTML = '';
+  }
 
   snippets.forEach((snippet) => {
     const card = document.createElement('button');
@@ -183,7 +187,7 @@ export function renderSnippetCards(
         </div>
         <div class="flex items-center gap-1 flex-shrink-0">
           <span class="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-700">${escapeHtml(typeLabel)}</span>
-          <span class="text-[10px] px-2 py-1 rounded-full bg-blue-50 text-blue-700">${escapeHtml(sourceLabel)}</span>
+          <span class="text-[10px] px-2 py-1 rounded-full bg-[rgba(94,106,210,0.08)] text-[#5e6ad2]">${escapeHtml(sourceLabel)}</span>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap mb-2">

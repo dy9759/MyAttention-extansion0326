@@ -22,6 +22,9 @@ import { refreshSnippetBadge } from './snippet-status';
 import { getBackgroundWebCaptureSettings } from './settings';
 import { localStoreSyncService } from './local-store-sync-service';
 import { FIRST_OPEN_WELCOME_PENDING_KEY } from '@/core/first-open';
+import { fetchBrowsingHistory } from './history-tracker';
+import { generateSummary, type SummaryRequest } from './attention-summarizer';
+import { startTabMonitor, cleanupTabMonitor } from './tab-monitor';
 
 // ============================================================================
 // 初始化设置
@@ -243,6 +246,7 @@ function setupTabBehaviorListeners(): void {
 
   chrome.tabs.onRemoved.addListener((tabId) => {
     messageHandlers.handleClearTabRuntimeStatus(tabId);
+    cleanupTabMonitor(tabId);
   });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -559,6 +563,37 @@ const messageHandlersMap: Record<
     const snippetStatus = await messageHandlers.handleGetSnippetStatusForTab(params.url || '');
     return { snippetStatus };
   },
+
+  'getBrowsingHistory': async (params) => {
+    const days = typeof params.days === 'number' ? params.days : 7;
+    const history = await fetchBrowsingHistory(days);
+    return { history };
+  },
+
+  'refreshBrowsingHistory': async (params) => {
+    const days = typeof params.days === 'number' ? params.days : 7;
+    const history = await fetchBrowsingHistory(days);
+    return { history };
+  },
+
+  'generateSummary': async (params) => {
+    const settings = await new Promise<any>((resolve) => {
+      chrome.storage.sync.get(['settings'], (result) => resolve(result.settings || {}));
+    });
+    const llmConfig = settings.llmApi;
+    if (!llmConfig?.apiKey) {
+      return { error: '请先在设置页配置 LLM API Key' };
+    }
+
+    const request: SummaryRequest = {
+      mode: params.mode || 'weekly',
+      topic: params.topic,
+      conversations: params.conversations || [],
+    };
+
+    const result = await generateSummary(llmConfig, request);
+    return { summary: result };
+  },
 };
 
 function normalizeMessageResponse(result: any): any {
@@ -606,7 +641,10 @@ function setupMessageListeners(): void {
         return false;
       }
 
-      const dispatchPromise = ENABLE_MESSAGE_DISPATCHER
+      // LLM 调用等长时操作绕过 dispatcher 超时
+      const BYPASS_DISPATCHER_TYPES = new Set(['generateSummary']);
+
+      const dispatchPromise = (ENABLE_MESSAGE_DISPATCHER && !BYPASS_DISPATCHER_TYPES.has(message.type))
         ? messageDispatcher.dispatch({
             messageType: message.type,
             params: message,
@@ -940,6 +978,9 @@ async function initialize(): Promise<void> {
 
     // 设置右键菜单入口
     setupContextMenus();
+
+    // 启动后台标签页监控（MyIsland 通知）
+    startTabMonitor();
 
     // 启动后主动修复已打开标签页中的失效内容脚本（无页面刷新）
     await restoreContentScriptsForOpenTabs('background.initialize');

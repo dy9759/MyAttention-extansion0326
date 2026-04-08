@@ -68,7 +68,12 @@ export type KnownChromeMessageType =
   | 'exportSnippetsToEverMemOS'
   | 'getEverMemOSStatus'
   | 'getBrowserSyncStatus'
-  | 'setEverMemOSBaseUrl';
+  | 'setEverMemOSBaseUrl'
+  // History
+  | 'getBrowsingHistory'
+  | 'refreshBrowsingHistory'
+  // Summary
+  | 'generateSummary';
 
 export type ChromeMessageType = KnownChromeMessageType;
 
@@ -167,6 +172,13 @@ export interface AppSettings {
   localStore?: {
     enabled: boolean;
     path?: string;
+  };
+  /** LLM API 配置 */
+  llmApi?: {
+    provider: 'bailian' | 'openai' | 'custom';
+    apiKey: string;
+    baseUrl?: string;
+    model?: string;
   };
   /** 网页内容采集设置 */
   webCapture?: {
@@ -413,3 +425,4 @@ export * from './message';
 export * from './conversation';
 export * from './platform';
 export * from './snippet';
+export * from './history';

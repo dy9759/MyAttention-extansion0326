@@ -8,7 +8,7 @@ function renderInline(text: string): string {
   html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   html = html.replace(
     /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noreferrer" class="text-blue-600 underline">$1</a>'
+    '<a href="$2" target="_blank" rel="noreferrer" class="text-[#5e6ad2] underline">$1</a>'
   );
 
   return html;

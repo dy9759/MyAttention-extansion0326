@@ -312,7 +312,7 @@ function getStorageBarColor(percent: number): string {
   if (percent > 60) {
     return 'bg-yellow-600 h-2 rounded-full transition-all';
   }
-  return 'bg-blue-600 h-2 rounded-full transition-all';
+  return 'bg-[#5e6ad2] h-2 rounded-full transition-all';
 }
 
 function closeExportDropdown(): void {

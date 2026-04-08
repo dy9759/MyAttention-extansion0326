@@ -42,6 +42,8 @@ export interface RenderOptions {
   searchTerm?: string;
   isMultiSelectMode?: boolean;
   selectedConversationIds?: Set<string>;
+  /** 是否在渲染前清空容器，默认 true */
+  clearContainer?: boolean;
 }
 
 // ============================================================================
@@ -50,16 +52,16 @@ export interface RenderOptions {
 
 export const elements = {
   /** 列表容器 */
-  memoriesContent: document.getElementById('memories-content'),
+  memoriesContent: document.getElementById('attention-content'),
 
   /** 加载状态 */
-  memoriesLoading: document.getElementById('memories-loading'),
+  memoriesLoading: document.getElementById('attention-loading'),
 
   /** 空状态 */
-  memoriesEmpty: document.getElementById('memories-empty'),
+  memoriesEmpty: document.getElementById('attention-empty'),
 
   /** 列表 */
-  memoriesList: document.getElementById('memories-list'),
+  memoriesList: document.getElementById('attention-list'),
 };
 
 // ============================================================================
@@ -187,7 +189,7 @@ export function renderConversationCards(options: RenderOptions): void {
   // 清空列表
   const listContainer =
     elements.memoriesList.querySelector('div') || elements.memoriesList;
-  if (listContainer) {
+  if (listContainer && options.clearContainer !== false) {
     listContainer.innerHTML = '';
   }
 
@@ -293,8 +295,8 @@ function createMultiSelectLayout(params: {
 }): string {
   const { conversation, isSelected } = params;
   const checkboxClass = isSelected
-    ? 'bg-blue-500 border-blue-500'
-    : 'hover:border-blue-400';
+    ? 'bg-[#5e6ad2] border-[#5e6ad2]'
+    : 'hover:border-[#828fff]';
 
   return `
     <!-- 多选模式下的布局 -->
@@ -334,7 +336,7 @@ function createNormalLayout(params: {
       <h3 class="font-medium text-sm truncate flex-1">${safeTitle}</h3>
       <div class="flex items-center gap-1 card-action opacity-0 transition-opacity duration-200 flex-shrink-0">
         <button
-          class="edit-title text-gray-400 hover:text-blue-500 p-1 rounded"
+          class="edit-title text-gray-400 hover:text-[#5e6ad2] p-1 rounded"
           title="${escapeHtml(safeGetMessage('editConversationTitle', 'Edit') || 'Edit')}"
           data-conversation-id="${conversation.conversationId}"
         >
@@ -342,7 +344,7 @@ function createNormalLayout(params: {
         </button>
         <button
           class="open-original
-          text-gray-400 hover:text-blue-500 p-1 rounded"
+          text-gray-400 hover:text-[#5e6ad2] p-1 rounded"
           title="${escapeHtml(safeGetMessage('openOriginalPage', 'Open') || 'Open')}"
           data-conversation-id="${conversation.conversationId}"
         >

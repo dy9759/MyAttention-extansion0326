@@ -3,7 +3,8 @@ export type RefreshTaskType =
   | 'refreshSnippets'
   | 'refreshStorageStats'
   | 'refreshLocalStoreStatus'
-  | 'refreshRuntimeDiagnostics';
+  | 'refreshRuntimeDiagnostics'
+  | 'refreshBrowsingHistory';
 
 export type RefreshTaskRunner = (taskType: RefreshTaskType) => Promise<void>;
 
@@ -31,6 +32,7 @@ const DEFAULT_PRIORITIES: Record<RefreshTaskType, number> = {
   refreshStorageStats: 80,
   refreshLocalStoreStatus: 60,
   refreshRuntimeDiagnostics: 40,
+  refreshBrowsingHistory: 70,
 };
 
 function resolveNow(): number {

@@ -12,8 +12,11 @@ import type {
   Snippet,
   SnippetGroupDetail,
   SnippetStatus,
+  BrowsingHistoryItem,
 } from '@/types';
+import { DEFAULT_SETTINGS } from '@/types';
 import { Logger } from '@/core/errors';
+import { renderMarkdownToHtml } from './markdown-renderer';
 import {
   getPlatformFromUrl,
   isSupportedPlatformUrl,
@@ -34,11 +37,6 @@ import {
   setAllConversations,
   getCurrentConversationId,
   renderConversationCards,
-  showLoading,
-  hideLoading,
-  showEmpty,
-  hideEmpty,
-  showList,
   elements as memoriesListElements,
 } from './memories-list';
 import {
@@ -78,7 +76,9 @@ import {
   installPopupGlobalErrorGuard,
   safeSendRuntimeMessage,
   safeGetMessage,
+  safeCreateTab,
 } from './chrome-safe';
+import { formatTimestamp, escapeHtml } from './utils/index';
 import { exportManager } from './export-manager';
 import {
   createPopupRefreshQueue,
@@ -87,10 +87,6 @@ import {
 } from './refresh-queue';
 import {
   renderSnippetCards,
-  showLoading as showSnippetsLoading,
-  hideLoading as hideSnippetsLoading,
-  showEmpty as showSnippetsEmpty,
-  showList as showSnippetsList,
   updateCurrentPageSnippetStatus,
   elements as snippetsListElements,
 } from './snippets-list';
@@ -153,6 +149,7 @@ interface EditTitleEvent {
 
 let cachedConversations: Conversation[] = [];
 let cachedSnippets: Snippet[] = [];
+let cachedHistory: BrowsingHistoryItem[] = [];
 let snippetFilterState: SnippetFilterState = { ...DEFAULT_SNIPPET_FILTER_STATE };
 let snippetSelectionMode = false;
 const selectedSnippetIds = new Set<string>();
@@ -163,6 +160,7 @@ let runtimeDiagnostics: RuntimeDiagnosticsViewModel | null = null;
 let recoveryToastShown = false;
 let refreshQueue: PopupRefreshQueue | null = null;
 let popupContextInvalidated = false;
+let attentionLoadingCount = 0;
 
 const SILENT_MESSAGE_TYPES = new Set(['reportContentRuntime']);
 const popupMessageRouter = createPopupMessageRouter({
@@ -177,15 +175,20 @@ const runtimeStatusElements = {
   lastSave: document.getElementById('runtime-last-save'),
   lastError: document.getElementById('runtime-last-error'),
   actionTip: document.getElementById('runtime-action-tip'),
-  emptySubtitle: document.getElementById('memories-empty-subtitle'),
+  emptySubtitle: document.getElementById('attention-empty-subtitle'),
 };
 
+/** 当前注意力筛选 */
+type AttentionFilter = 'all' | 'aichat' | 'highlight' | 'dwell' | 'history';
+let currentAttentionFilter: AttentionFilter = 'all';
+
+// snippet filter 已由 attention pills 替代，保留空对象兼容
 const snippetFilterElements = {
-  searchInput: document.getElementById('snippet-search-input') as HTMLInputElement | null,
-  typeSelect: document.getElementById('snippet-type-filter') as HTMLSelectElement | null,
-  sourceSelect: document.getElementById('snippet-source-filter') as HTMLSelectElement | null,
-  dateSelect: document.getElementById('snippet-date-filter') as HTMLSelectElement | null,
-};
+  searchInput: null as HTMLInputElement | null,
+  typeSelect: null as HTMLSelectElement | null,
+  sourceSelect: null as HTMLSelectElement | null,
+  dateSelect: null as HTMLSelectElement | null,
+} as const;
 
 const ENABLE_RUNTIME_DIAGNOSTICS = Boolean(runtimeStatusElements.card);
 
@@ -231,6 +234,9 @@ function getRefreshQueue(): PopupRefreshQueue {
         if (ENABLE_RUNTIME_DIAGNOSTICS) {
           await refreshRuntimeDiagnostics();
         }
+        break;
+      case 'refreshBrowsingHistory':
+        await loadBrowsingHistory();
         break;
       default:
         break;
@@ -556,6 +562,12 @@ export function initPopup() {
     initializeConversationDetail();
     initializeSnippetDetail();
 
+    // 初始化总结页
+    initializeSummaryPage();
+
+    // 初始化 LLM 设置
+    initializeLlmSettings();
+
     // 监听存储变化
     setupStorageChangeListener();
 
@@ -593,13 +605,7 @@ function setVersionNumber() {
 
 async function selectInitialTab(): Promise<void> {
   try {
-    const activeTab = await getActiveTab();
-    const mode = getPageCaptureMode(activeTab?.url || '');
-    if (mode === 'generic_web') {
-      switchTab('snippets');
-      return;
-    }
-    switchTab('memories');
+    switchTab('attention');
   } catch (error) {
     logPopupError('选择默认标签页', error);
   }
@@ -649,21 +655,34 @@ function initializeMemoriesList() {
   Logger.debug('[Popup] 初始化记忆列表');
 
   // 注册标签切换监听
-  const tabMemories = document.getElementById('tab-memories');
-  const tabSnippets = document.getElementById('tab-snippets');
+  const tabAttention = document.getElementById('tab-attention');
+  const tabSummary = document.getElementById('tab-summary');
+  const tabRecommend = document.getElementById('tab-recommend');
   const tabSettings = document.getElementById('tab-settings');
 
-  if (tabMemories) {
-    tabMemories.addEventListener('click', () => switchTab('memories'));
+  if (tabAttention) {
+    tabAttention.addEventListener('click', () => switchTab('attention'));
   }
-
-  if (tabSnippets) {
-    tabSnippets.addEventListener('click', () => switchTab('snippets'));
+  if (tabSummary) {
+    tabSummary.addEventListener('click', () => switchTab('summary'));
   }
-
+  if (tabRecommend) {
+    tabRecommend.addEventListener('click', () => switchTab('recommend'));
+  }
   if (tabSettings) {
     tabSettings.addEventListener('click', () => switchTab('settings'));
   }
+
+  // 注册导航筛选 pill 按钮
+  const filterPills = document.querySelectorAll('#attention-filter-pills .attention-pill');
+  filterPills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      const filter = (pill as HTMLElement).dataset.filter as AttentionFilter;
+      if (filter) {
+        switchAttentionFilter(filter);
+      }
+    });
+  });
 
   // 注册返回列表按钮监听（详情页）
   const backBtn = document.getElementById('back-to-list');
@@ -674,6 +693,7 @@ function initializeMemoriesList() {
   // 初始化数据
   enqueueRefresh('refreshConversations');
   enqueueRefresh('refreshSnippets');
+  enqueueRefresh('refreshBrowsingHistory');
 
   Logger.debug('[Popup] 记忆列表已初始化');
 }
@@ -901,7 +921,7 @@ function initializeSnippetDetail() {
 
   snippetDetailElements.back?.addEventListener('click', () => {
     hideSnippetDetail();
-    switchTab('snippets');
+    switchTab('attention');
   });
 
   snippetDetailElements.openOriginal?.addEventListener('click', () => {
@@ -961,7 +981,7 @@ function initializeSnippetDetail() {
  */
 function syncDetailPageState() {
   const detailPage = document.getElementById('conversation-detail');
-  const memoriesTab = document.getElementById('tab-memories');
+  const memoriesTab = document.getElementById('tab-attention');
 
   if (!detailPage || !memoriesTab) {
     return;
@@ -1395,7 +1415,169 @@ function handleDeleteConversation(detail: any): void {
 /**
  * 切换标签页
  */
-function switchTab(tabName: 'memories' | 'snippets' | 'settings'): void {
+// ============================================================================
+// 总结页逻辑
+// ============================================================================
+
+let currentSummaryMode: 'weekly' | 'topic' | 'psychology' = 'weekly';
+
+function initializeSummaryPage(): void {
+  // 模式 pill 切换
+  const pills = document.querySelectorAll('.summary-mode-pill');
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      const mode = (pill as HTMLElement).dataset.summaryMode as typeof currentSummaryMode;
+      if (!mode) return;
+      currentSummaryMode = mode;
+
+      pills.forEach((p) => {
+        const el = p as HTMLElement;
+        if (el.dataset.summaryMode === mode) {
+          el.classList.add('active');
+          el.classList.remove('bg-gray-100', 'text-gray-600');
+        } else {
+          el.classList.remove('active');
+          el.classList.add('bg-gray-100', 'text-gray-600');
+        }
+      });
+
+      const topicGroup = document.getElementById('topic-input-group');
+      if (topicGroup) {
+        topicGroup.classList.toggle('hidden', mode !== 'topic');
+      }
+    });
+  });
+
+  // 生成按钮
+  const generateBtn = document.getElementById('generate-summary-btn');
+  if (generateBtn) {
+    generateBtn.addEventListener('click', () => {
+      void handleGenerateSummary();
+    });
+  }
+}
+
+async function handleGenerateSummary(): Promise<void> {
+  const loadingEl = document.getElementById('summary-loading');
+  const resultEl = document.getElementById('summary-result');
+  const resultContent = document.getElementById('summary-result-content');
+  const emptyEl = document.getElementById('summary-empty');
+  const generateBtn = document.getElementById('generate-summary-btn') as HTMLButtonElement | null;
+
+  // 显示加载状态
+  if (loadingEl) loadingEl.classList.remove('hidden');
+  if (resultEl) resultEl.classList.add('hidden');
+  if (emptyEl) emptyEl.classList.add('hidden');
+  if (generateBtn) {
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>生成中...</span>';
+  }
+
+  try {
+    const topic = (document.getElementById('summary-topic-input') as HTMLInputElement | null)?.value || '';
+
+    // 获取最近7天的对话数据
+    const response = await safeSendRuntimeMessage({
+      type: 'generateSummary',
+      mode: currentSummaryMode,
+      topic,
+      conversations: cachedConversations,
+    });
+
+    const summary = (response as any)?.summary || (response as any)?.data?.summary;
+    const error = (response as any)?.error || (response as any)?.data?.error;
+
+    if (error) {
+      if (resultContent) resultContent.innerHTML = `<p class="text-red-500">${escapeHtml(error)}</p>`;
+    } else if (summary) {
+      if (resultContent) resultContent.innerHTML = renderMarkdownToHtml(summary);
+    } else {
+      if (resultContent) resultContent.innerHTML = '<p class="text-gray-400">未获取到总结结果</p>';
+    }
+
+    if (resultEl) resultEl.classList.remove('hidden');
+  } catch (error) {
+    logPopupError('生成总结', error);
+    if (resultContent) {
+      resultContent.innerHTML = `<p class="text-red-500">生成失败：${escapeHtml(String(error))}</p>`;
+    }
+    if (resultEl) resultEl.classList.remove('hidden');
+  } finally {
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (generateBtn) {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<i class="fas fa-magic"></i><span>生成总结</span>';
+    }
+  }
+}
+
+// ============================================================================
+// LLM 设置
+// ============================================================================
+
+function initializeLlmSettings(): void {
+  const providerSelect = document.getElementById('llm-provider') as HTMLSelectElement | null;
+  const baseUrlGroup = document.getElementById('llm-base-url-group');
+  const saveBtn = document.getElementById('save-llm-config');
+  const statusEl = document.getElementById('llm-config-status');
+
+  // 显示/隐藏 base URL
+  providerSelect?.addEventListener('change', () => {
+    if (baseUrlGroup) {
+      baseUrlGroup.classList.toggle('hidden', providerSelect.value !== 'custom');
+    }
+  });
+
+  // 加载已保存的配置
+  chrome.storage.sync.get(['settings'], (result) => {
+    const settings = result.settings as AppSettings | undefined;
+    const llm = settings?.llmApi;
+    if (llm) {
+      if (providerSelect) providerSelect.value = llm.provider || 'bailian';
+      const keyInput = document.getElementById('llm-api-key') as HTMLInputElement | null;
+      if (keyInput) keyInput.value = llm.apiKey || '';
+      const baseUrlInput = document.getElementById('llm-base-url') as HTMLInputElement | null;
+      if (baseUrlInput) baseUrlInput.value = llm.baseUrl || '';
+      const modelInput = document.getElementById('llm-model') as HTMLInputElement | null;
+      if (modelInput) modelInput.value = llm.model || 'qwen-plus';
+      if (baseUrlGroup) {
+        baseUrlGroup.classList.toggle('hidden', llm.provider !== 'custom');
+      }
+    }
+  });
+
+  // 保存
+  saveBtn?.addEventListener('click', () => {
+    const provider = (providerSelect?.value || 'bailian') as 'bailian' | 'openai' | 'custom';
+    const apiKey = (document.getElementById('llm-api-key') as HTMLInputElement | null)?.value || '';
+    const baseUrl = (document.getElementById('llm-base-url') as HTMLInputElement | null)?.value || '';
+    const model = (document.getElementById('llm-model') as HTMLInputElement | null)?.value || 'qwen-plus';
+
+    if (!apiKey) {
+      if (statusEl) {
+        statusEl.textContent = '请输入 API Key';
+        statusEl.className = 'text-xs text-red-500 text-center';
+        statusEl.classList.remove('hidden');
+      }
+      return;
+    }
+
+    chrome.storage.sync.get(['settings'], (result) => {
+      const settings: AppSettings = result.settings || { ...DEFAULT_SETTINGS };
+      settings.llmApi = { provider, apiKey, baseUrl: baseUrl || undefined, model: model || undefined };
+      chrome.storage.sync.set({ settings }, () => {
+        if (statusEl) {
+          statusEl.textContent = '✓ 已保存';
+          statusEl.className = 'text-xs text-green-600 text-center';
+          statusEl.classList.remove('hidden');
+          setTimeout(() => statusEl.classList.add('hidden'), 2000);
+        }
+      });
+    });
+  });
+}
+
+function switchTab(tabName: 'attention' | 'summary' | 'recommend' | 'settings'): void {
   Logger.debug(`[Popup] 切换标签页: ${tabName}`);
 
   const tabs = document.querySelectorAll('.sidebar-btn');
@@ -1406,9 +1588,6 @@ function switchTab(tabName: 'memories' | 'snippets' | 'settings'): void {
     conversationDetailElements.conversationDetail.classList.add('hidden');
   }
   hideSnippetDetail();
-  if (tabName !== 'snippets' && snippetSelectionMode) {
-    toggleSnippetSelectionMode(false);
-  }
 
   // 更新标签按钮样式
   tabs.forEach((tab) => {
@@ -1430,18 +1609,69 @@ function switchTab(tabName: 'memories' | 'snippets' | 'settings'): void {
     }
   });
 
-  // 显示主导航和概览（从详情页返回时时）
+  // 显示主导航和概览（从详情页返回时）
   const dataOverview = document.querySelector('header');
   if (dataOverview && tabName !== 'settings') {
     dataOverview.classList.remove('hidden');
   }
 
-  // 如果切换到记忆列表，刷新数据
-  if (tabName === 'memories') {
+  // 刷新数据
+  if (tabName === 'attention') {
     enqueueRefresh('refreshConversations');
-    enqueueRefresh('refreshStorageStats');
-  } else if (tabName === 'snippets') {
     enqueueRefresh('refreshSnippets');
+    enqueueRefresh('refreshBrowsingHistory');
+    enqueueRefresh('refreshStorageStats');
+  }
+}
+
+/**
+ * 切换注意力筛选
+ */
+function switchAttentionFilter(filter: AttentionFilter): void {
+  currentAttentionFilter = filter;
+
+  // 更新 pill 按钮样式
+  const pills = document.querySelectorAll('#attention-filter-pills .attention-pill');
+  pills.forEach((pill) => {
+    const el = pill as HTMLElement;
+    if (el.dataset.filter === filter) {
+      el.classList.add('active');
+      el.classList.remove('bg-gray-100', 'text-gray-600');
+    } else {
+      el.classList.remove('active');
+      el.classList.add('bg-gray-100', 'text-gray-600');
+    }
+  });
+
+  // 显示/隐藏片段相关操作按钮
+  const actionsEl = document.getElementById('attention-actions');
+  if (actionsEl) {
+    actionsEl.classList.toggle('hidden', filter === 'aichat' || filter === 'history');
+  }
+
+  // 退出选择合并模式（如果切换到非片段筛选）
+  if (filter === 'aichat' && snippetSelectionMode) {
+    toggleSnippetSelectionMode(false);
+  }
+
+  renderAttentionList();
+}
+
+// ============================================================================
+// 统一加载状态管理
+// ============================================================================
+
+function showAttentionLoading(): void {
+  attentionLoadingCount++;
+  const el = document.getElementById('attention-loading');
+  if (el) el.classList.remove('hidden');
+}
+
+function hideAttentionLoading(): void {
+  attentionLoadingCount = Math.max(0, attentionLoadingCount - 1);
+  if (attentionLoadingCount === 0) {
+    const el = document.getElementById('attention-loading');
+    if (el) el.classList.add('hidden');
   }
 }
 
@@ -1465,52 +1695,169 @@ function extractConversationsFromResponse(
 }
 
 function renderCurrentConversationList(): void {
-  const conversations = getFilteredConversations();
-
-  if (!conversations.length) {
-    showEmpty();
-    updateEmptyReasonHint();
-    return;
-  }
-
-  hideEmpty();
-  showList();
-  renderConversationCards({
-    conversations,
-    isMultiSelectMode,
-    selectedConversationIds,
-  });
+  renderAttentionList();
 }
 
 function syncSnippetFilterUI(): void {
-  if (snippetFilterElements.searchInput) {
-    snippetFilterElements.searchInput.value = snippetFilterState.query;
-  }
-  if (snippetFilterElements.typeSelect) {
-    snippetFilterElements.typeSelect.value = snippetFilterState.type;
-  }
-  if (snippetFilterElements.sourceSelect) {
-    snippetFilterElements.sourceSelect.value = snippetFilterState.source;
-  }
-  if (snippetFilterElements.dateSelect) {
-    snippetFilterElements.dateSelect.value = snippetFilterState.dateRange;
-  }
+  // Snippet filter dropdowns removed; filter is now driven by attention pills
 }
 
 function renderCurrentSnippetList(): void {
-  const snippets = getFilteredSnippets();
-  if (!snippets.length) {
-    showSnippetsEmpty();
-    updateSnippetMergeControls();
-    return;
-  }
+  renderAttentionList();
+}
 
-  showSnippetsList();
-  renderSnippetCards(snippets, {
-    selectionMode: snippetSelectionMode,
-    selectedSnippetIds,
+/**
+ * 统一渲染注意力列表（根据当前筛选）
+ */
+function renderAttentionList(): void {
+  const listEl = document.getElementById('attention-list');
+  const emptyEl = document.getElementById('attention-empty');
+  const loadingEl = document.getElementById('attention-loading');
+
+  if (!listEl) return;
+
+  const listContainer = listEl.querySelector('div') || listEl;
+
+  // 隐藏加载状态
+  if (loadingEl) loadingEl.classList.add('hidden');
+
+  const filter = currentAttentionFilter;
+
+  if (filter === 'aichat') {
+    // 仅展示 AI 对话
+    const conversations = getFilteredConversations();
+    if (!conversations.length) {
+      listEl.classList.add('hidden');
+      if (emptyEl) { emptyEl.classList.remove('hidden'); }
+      return;
+    }
+    if (emptyEl) { emptyEl.classList.add('hidden'); }
+    listEl.classList.remove('hidden');
+    listContainer.innerHTML = '';
+    renderConversationCards({
+      conversations,
+      isMultiSelectMode,
+      selectedConversationIds,
+    });
+  } else if (filter === 'history') {
+    // 仅展示浏览历史
+    if (!cachedHistory.length) {
+      listEl.classList.add('hidden');
+      if (emptyEl) { emptyEl.classList.remove('hidden'); }
+      return;
+    }
+    if (emptyEl) { emptyEl.classList.add('hidden'); }
+    listEl.classList.remove('hidden');
+    listContainer.innerHTML = '';
+    renderHistoryCards(cachedHistory, listContainer);
+  } else if (filter === 'highlight' || filter === 'dwell') {
+    // 仅展示指定类型的片段
+    const filtered = cachedSnippets.filter((s) => s.type === filter);
+    if (!filtered.length) {
+      listEl.classList.add('hidden');
+      if (emptyEl) { emptyEl.classList.remove('hidden'); }
+      updateSnippetMergeControls();
+      return;
+    }
+    if (emptyEl) { emptyEl.classList.add('hidden'); }
+    listEl.classList.remove('hidden');
+    listContainer.innerHTML = '';
+    renderSnippetCards(filtered, {
+      selectionMode: snippetSelectionMode,
+      selectedSnippetIds,
+    });
+    updateSnippetMergeControls();
+  } else {
+    // 全部模式：混合展示
+    const conversations = getFilteredConversations();
+    const snippets = cachedSnippets;
+
+    if (!conversations.length && !snippets.length) {
+      listEl.classList.add('hidden');
+      if (emptyEl) { emptyEl.classList.remove('hidden'); }
+      return;
+    }
+    if (emptyEl) { emptyEl.classList.add('hidden'); }
+    listEl.classList.remove('hidden');
+    listContainer.innerHTML = '';
+
+    // 构建混合时间线
+    type TimelineItem = { time: number; type: 'conversation'; data: Conversation } | { time: number; type: 'snippet'; data: Snippet };
+    const timeline: TimelineItem[] = [];
+
+    conversations.forEach((c) => {
+      timeline.push({
+        time: new Date(c.updatedAt || c.createdAt).getTime(),
+        type: 'conversation',
+        data: c,
+      });
+    });
+    snippets.forEach((s) => {
+      timeline.push({
+        time: new Date(s.updatedAt || s.createdAt).getTime(),
+        type: 'snippet',
+        data: s,
+      });
+    });
+
+    timeline.sort((a, b) => b.time - a.time);
+
+    // 分批渲染：先渲染对话，再渲染片段（各自的 render 函数会 append 到 listContainer）
+    // 但由于 renderConversationCards 和 renderSnippetCards 会清空容器，
+    // 我们需要逐个创建卡片。使用各自的渲染但分开处理。
+    // 简化方案：先渲染对话卡片，再渲染片段卡片，利用 DOM 排序
+    const convBatch = timeline.filter((i) => i.type === 'conversation').map((i) => i.data as Conversation);
+    const snippetBatch = timeline.filter((i) => i.type === 'snippet').map((i) => i.data as Snippet);
+
+    if (convBatch.length) {
+      renderConversationCards({
+        conversations: convBatch,
+        isMultiSelectMode,
+        selectedConversationIds,
+        clearContainer: false,
+      });
+    }
+    if (snippetBatch.length) {
+      renderSnippetCards(snippetBatch, {
+        selectionMode: snippetSelectionMode,
+        selectedSnippetIds,
+        clearContainer: false,
+      });
+    }
+    updateSnippetMergeControls();
+  }
+}
+
+function renderHistoryCards(items: BrowsingHistoryItem[], container: Element): void {
+  items.forEach((item) => {
+    const card = document.createElement('div');
+    card.className = 'memory-card bg-white p-3 rounded-lg shadow-sm cursor-pointer';
+    card.addEventListener('click', () => {
+      void safeCreateTab(item.url);
+    });
+
+    const visitTime = formatTimestamp(item.lastVisitTime);
+    const domainDisplay = escapeHtml(item.domain);
+    const titleDisplay = escapeHtml(item.title || item.url);
+
+    card.innerHTML = `
+      <div class="flex items-start gap-2">
+        <div class="flex-shrink-0 w-6 h-6 rounded bg-green-50 flex items-center justify-center mt-0.5">
+          <i class="fas fa-globe text-green-500 text-xs"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-gray-800 truncate">${titleDisplay}</div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs text-gray-400 truncate">${domainDisplay}</span>
+            <span class="text-xs text-gray-300">·</span>
+            <span class="text-xs text-gray-400">${item.visitCount} 次访问</span>
+          </div>
+          <div class="text-xs text-gray-400 mt-1">${visitTime}</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
   });
-  updateSnippetMergeControls();
 }
 
 function updateSnippetFilters(partial: Partial<SnippetFilterState>): void {
@@ -1652,7 +1999,7 @@ async function loadConversations(): Promise<void> {
     return;
   }
 
-  showLoading();
+  showAttentionLoading();
 
   try {
     const response = await safeSendRuntimeMessage<unknown, Conversation[]>({
@@ -1667,17 +2014,15 @@ async function loadConversations(): Promise<void> {
     setAllConversations(conversations);
     setAllConversationsForFilter(conversations);
     applyFilter();
-    renderCurrentConversationList();
+    renderAttentionList();
     enqueueRefresh('refreshStorageStats');
     if (ENABLE_RUNTIME_DIAGNOSTICS) {
       enqueueRefresh('refreshRuntimeDiagnostics');
     }
   } catch (error) {
     logPopupError('加载对话', error);
-    showEmpty();
-    updateEmptyReasonHint();
   } finally {
-    hideLoading();
+    hideAttentionLoading();
   }
 }
 
@@ -1686,7 +2031,7 @@ async function loadSnippets(): Promise<void> {
     return;
   }
 
-  showSnippetsLoading();
+  showAttentionLoading();
 
   try {
     const response = await safeSendRuntimeMessage<unknown, { snippets?: Snippet[] }>({
@@ -1726,10 +2071,25 @@ async function loadSnippets(): Promise<void> {
     }
   } catch (error) {
     logPopupError('加载片段', error);
-    showSnippetsEmpty();
     updateCurrentPageSnippetStatus(false);
   } finally {
-    hideSnippetsLoading();
+    hideAttentionLoading();
+  }
+}
+
+async function loadBrowsingHistory(): Promise<void> {
+  if (popupContextInvalidated) return;
+
+  try {
+    const response = await safeSendRuntimeMessage<unknown, { history?: BrowsingHistoryItem[] }>({
+      type: 'getBrowsingHistory',
+      days: 7,
+    });
+    const items = (response as any)?.history || (response as any)?.data?.history || [];
+    cachedHistory = Array.isArray(items) ? items : [];
+    renderAttentionList();
+  } catch (error) {
+    logPopupError('加载浏览历史', error);
   }
 }
 
@@ -1761,7 +2121,7 @@ async function deleteSnippetById(id: string): Promise<void> {
       await rebuildCurrentTabHighlights(true);
     }
     hideSnippetDetail();
-    switchTab('snippets');
+    switchTab('attention');
     enqueueRefresh('refreshSnippets');
   } catch (error) {
     logPopupError('删除片段', error);
@@ -1830,7 +2190,7 @@ async function deleteSnippetItemById(id: string): Promise<void> {
     const detail = extractSnippetDetailResponse(detailResponse as ChromeMessageResponse<any>);
     if (!detail) {
       hideSnippetDetail();
-      switchTab('snippets');
+      switchTab('attention');
       return;
     }
 
@@ -1936,7 +2296,7 @@ function renderPlatformFilterOptions(): void {
         data-platform="${platform.id}"
       >
         <span>${platform.label}</span>
-        <i class="fas fa-check text-blue-500 hidden"></i>
+        <i class="fas fa-check text-[#5e6ad2] hidden"></i>
       </button>
     `
   ).join('');
@@ -1971,7 +2331,7 @@ function refreshPlatformOptionState(): void {
       const icon = button.querySelector('i');
       const platform = button.dataset.platform as Conversation['platform'] | undefined;
       const selected = !!platform && selectedPlatforms.has(platform);
-      button.classList.toggle('bg-blue-50', selected);
+      button.classList.toggle('bg-[rgba(94,106,210,0.08)]', selected);
       if (icon) {
         icon.classList.toggle('hidden', !selected);
       }

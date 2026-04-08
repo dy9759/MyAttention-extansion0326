@@ -75,7 +75,7 @@ function renderItem(item: SnippetItem, index: number): string {
         <div class="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            class="snippet-item-focus px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 hover:bg-blue-100"
+            class="snippet-item-focus px-2 py-1 text-xs rounded bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] hover:bg-[rgba(94,106,210,0.12)]"
             data-item-id="${escapeHtml(item.id)}"
           >
             定位

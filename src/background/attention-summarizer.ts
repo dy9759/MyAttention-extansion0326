@@ -1,0 +1,164 @@
+/**
+ * 注意力总结引擎
+ * 基于采集的对话/片段数据，调用 LLM 生成总结报告
+ */
+
+import { Logger } from '@/core/errors';
+import { callLlm, type LlmMessage } from './llm-client';
+import type { AppSettings, Conversation } from '@/types';
+
+// ============================================================================
+// 提示词模板
+// ============================================================================
+
+export type SummaryMode = 'weekly' | 'topic' | 'psychology';
+
+const PROMPT_WEEKLY = `# 背景
+你擅长从我与 AI 的海量、零散对话信息中，关注我的提问与回应，识别我的核心模式、提炼关键洞见，并提供富有远见的行动建议。请严格、客观、深刻地履行你的职责。
+这是我过去一周与 AI 的完整对话记录文件，它们是原始的、未经加工的"思想矿石"。
+
+# 任务
+你的核心任务是，基于我提供的对话记录，为我生成一份最近 7 天的周报。这份周报的目标不是简单罗列我做了什么，而是要揭示我的智力焦点、思维模式，并为我下一周的行动提供高价值的导航。
+
+请参考以下格式输出报告，确保每一部分都言之有物、直击要点（如果你认为某部分特别值得展开，请详细讲讲）：
+
+---
+
+### 个人周报
+周期： [请根据对话记录填写起始日期]
+
+#### 🧠 本周智力焦点
+- 高度概括本周我投入最多心力的核心议题是什么，并简要复盘主要成果？
+
+#### ✨ 关键洞见与突破
+- "啊哈"时刻：列出用户本周最重要的 1-3 个"啊哈时刻"，直接引用对话中的关键结论。
+
+#### 🤔 难题与挑战
+- 反复出现的问题：我本周是否反复问及某个相似的问题，或在某个主题上停滞不前？这些问题不仅是"事"的问题，也有"人"的内在问题：这通常意味着我的深层的困惑/知识盲区/行为模式/心理动力问题，请犀利的挖掘出来。
+- 被忽略的线索：在对话中是否出现了一些极有潜力但被我忽略或没有追问的"线索"或"新想法"？
+
+#### 🚀 下周导航
+综合以上所有分析，给予用户简洁、温暖的鼓励，并提出 1-2 个富有启发性的问题或讨论，可作为我下周可选的深度思考，帮助我获得最大的认知突破或项目进展。
+
+---
+
+# 规则与约束
+1. 拒绝流水账：不要复述对话内容，要提炼和分析。
+2. 深刻而非表面：你的价值在于揭示我可能没有意识到的模式和联系。
+3. 言简意赅：整份报告应简洁有力，避免空话和不必要的修饰。
+4. 绝对客观：基于数据和事实进行分析，不要主观臆测。
+5. 批判性伙伴：不要只做总结者，更要做挑战者。
+6. 承认局限，谨慎措辞：在指出任何潜在的"缺失"或"盲区"时，你必须明确这是一个基于对话记录的观察，建议使用类似"在本次提供的对话中，似乎较少探讨……"的建言，严禁使用"你忽略了XX"或"你没有做XX"这类武断的判断。
+
+请开始你的分析。`;
+
+const PROMPT_TOPIC = `# 背景
+你擅长从我与 AI 的海量、零散对话信息中，找到与目标主题相关的信息，帮助用户复盘对话、巩固记忆。
+
+# 任务
+分析聊天记录中，关于 [TOPIC] 的对话记录，进行主题洞察。
+
+请按以下结构输出：
+
+## 🎯 主题概述
+[简要描述这个主题/项目的核心内容]
+
+## 🔍 核心记忆点
+（简要呈现对话中，用户了解的关键信息点，按照重要性排序。必要时可直接引用对话中的用户原句）
+……
+
+## 📈 认知演进路径
+（结合对话的时间信息）
+- 早期： [最初的思考起点和关注点]
+- 中期： [思考的转变或关注点的转移]
+- 近期： [当前阶段的深入思考或核心议题]
+
+## ⚠️ 关联、风险与盲点
+- 隐藏的关联： [指出不同讨论点之间被忽略的内在联系]
+- 潜在的矛盾/张力： [指出对话中存在的观点张力或决策权衡]
+- 风险与盲点： [指出讨论中可能被忽略的风险、未考虑到的方面]
+
+## 🚀 待议问题
+[从讨论中浮现出的、需要进一步思考的开放性问题]
+
+## 🔗 相关资源推荐
+[基于讨论内容推荐的学习资源、工具或进一步阅读材料，必须推荐真实存在的信息，如无把握，不要推荐]`;
+
+const PROMPT_PSYCHOLOGY = `你是专业的认知心理与心理动力学咨询师，帮我分析以下我和 AI 的对话中的表现，关注我的发言、消息时间等任何可能的信息。
+
+保持高度专注，完整阅读，洞察潜在的思维认知/行为模式/内心张力，甚至是创伤信号（如果有，但不要称其为创伤），识别与我值得探讨的主题，像一位直言不讳的老友的来信风格，自然、温柔但犀利地写出一份详略得当、力出一孔、直击灵魂的分析。
+
+接下来，直接开始写出分析内容`;
+
+// ============================================================================
+// 数据准备
+// ============================================================================
+
+function formatConversationsForLlm(conversations: Conversation[], maxChars: number = 60000): string {
+  const parts: string[] = [];
+  let totalLen = 0;
+
+  for (const conv of conversations) {
+    const header = `\n---\n## ${conv.title} (${conv.platform}, ${conv.updatedAt})\n`;
+    if (totalLen + header.length > maxChars) break;
+    parts.push(header);
+    totalLen += header.length;
+
+    for (const msg of conv.messages) {
+      const role = msg.sender === 'user' ? '我' : 'AI';
+      const line = `**${role}**: ${msg.content}\n`;
+      if (totalLen + line.length > maxChars) break;
+      parts.push(line);
+      totalLen += line.length;
+    }
+  }
+
+  return parts.join('');
+}
+
+// ============================================================================
+// 总结生成
+// ============================================================================
+
+export interface SummaryRequest {
+  mode: SummaryMode;
+  topic?: string; // 仅 mode=topic 时需要
+  conversations: Conversation[];
+}
+
+export async function generateSummary(
+  config: NonNullable<AppSettings['llmApi']>,
+  request: SummaryRequest
+): Promise<string> {
+  const { mode, topic, conversations } = request;
+
+  if (!conversations.length) {
+    return '暂无对话记录可供分析。请先在 AI 聊天页面积累一些对话数据。';
+  }
+
+  let systemPrompt: string;
+  switch (mode) {
+    case 'weekly':
+      systemPrompt = PROMPT_WEEKLY;
+      break;
+    case 'topic':
+      systemPrompt = PROMPT_TOPIC.replace('[TOPIC]', topic || '（未指定主题）');
+      break;
+    case 'psychology':
+      systemPrompt = PROMPT_PSYCHOLOGY;
+      break;
+    default:
+      systemPrompt = PROMPT_WEEKLY;
+  }
+
+  const conversationText = formatConversationsForLlm(conversations);
+
+  const messages: LlmMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: `以下是我的对话记录：\n${conversationText}` },
+  ];
+
+  Logger.info(`[Summarizer] 生成 ${mode} 总结, ${conversations.length} 条对话, ${conversationText.length} 字符`);
+
+  return callLlm(config, { messages, temperature: 0.7, maxTokens: 4096 });
+}

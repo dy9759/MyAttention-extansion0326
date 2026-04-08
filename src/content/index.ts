@@ -109,6 +109,7 @@ const lastSavedSignatureByUrl = new Map<string, string>();
 const SAVE_TRACE_ENABLED = !!import.meta.env?.DEV;
 let hasRuntimeContextInvalidated = false;
 let hasInstalledGlobalErrorGuard = false;
+let contentLastSaveAt: string | undefined;
 
 interface RuntimeStatusReportPayload {
   injected?: boolean;
@@ -174,6 +175,9 @@ function installGlobalErrorGuard(): void {
 }
 
 function reportRuntimeStatus(payload: RuntimeStatusReportPayload): void {
+  if (payload.lastSaveAt) {
+    contentLastSaveAt = payload.lastSaveAt;
+  }
   if (hasRuntimeContextInvalidated || !isRuntimeContextAvailable()) {
     return;
   }
@@ -797,6 +801,7 @@ function initRuntimeHealthListener(): void {
         platform,
         url: window.location.href,
         timestamp: new Date().toISOString(),
+        lastSaveAt: contentLastSaveAt,
       });
       return true;
     });

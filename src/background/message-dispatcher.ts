@@ -40,6 +40,7 @@ const DEFAULT_POLICY: MessageDispatchPolicy = {
     'getLocalStoreMigrationState',
     'getEverMemOSStatus',
     'getBrowserSyncStatus',
+    'getBrowsingHistory',
   ]),
   writeQueueTypes: new Set([
     'createConversation',

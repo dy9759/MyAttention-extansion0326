@@ -8,16 +8,26 @@
   <link rel="stylesheet" href="../lib/fontawesome/all.min.css">
   <style>
     :root {
-      --primary-color: #3b82f6;
-      --primary-hover: #2563eb;
-      --bg-color: #f9fafb;
+      /* Linear-inspired light theme */
+      --primary-color: #5e6ad2;
+      --primary-hover: #7170ff;
+      --primary-light: rgba(94, 106, 210, 0.08);
+      --bg-color: #f7f8f8;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f3f4f5;
       --card-bg: #ffffff;
-      --text-primary: #1f2937;
+      --text-primary: #1a1a1a;
       --text-secondary: #6b7280;
-      --border-color: #e5e7eb;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --radius: 0.5rem;
+      --text-tertiary: #8a8f98;
+      --text-quaternary: #b0b4ba;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --border-subtle: rgba(0, 0, 0, 0.05);
+      --shadow-sm: rgba(0, 0, 0, 0.04) 0px 1px 2px;
+      --shadow-md: rgba(0, 0, 0, 0.06) 0px 2px 8px, rgba(0, 0, 0, 0.04) 0px 1px 2px;
+      --shadow-lg: rgba(0, 0, 0, 0.08) 0px 4px 16px, rgba(0, 0, 0, 0.04) 0px 2px 4px;
+      --radius: 8px;
+      --radius-sm: 6px;
+      --radius-pill: 9999px;
     }
     
     /* 自定义数据概览图标是否展示的断点 */
@@ -34,14 +44,17 @@
     body {
       min-width: 300px;
       min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-feature-settings: "cv01", "ss03";
       margin: 0;
       padding: 0;
-      overflow: hidden; /* Prevent whole page scrolling */
+      overflow: hidden;
       display: flex;
       flex-direction: row;
       background-color: var(--bg-color);
       color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .tab-content {
@@ -54,15 +67,16 @@
     }
     
     .memory-card {
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
+      background: var(--card-bg);
+      box-shadow: var(--shadow-sm);
     }
-    
+
     .memory-card:hover {
-      /* box-shadow: var(--shadow-md); */ /* Removed hover effect */
-      /* transform: translateY(-2px); */ /* Removed hover effect */
-      border-color: #d1d5db; /* Keep border highlight or remove if no visual change desired */
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: var(--shadow-md);
     }
     
     /* 卡片交互按钮hover效果 */
@@ -85,17 +99,39 @@
     }
     
     /* 统一的平台标签样式 */
+    .attention-pill {
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    .attention-pill.active {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      box-shadow: rgba(94, 106, 210, 0.2) 0px 1px 3px;
+    }
+    .attention-pill:not(.active):hover {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+    .summary-mode-pill.active {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      box-shadow: rgba(94, 106, 210, 0.2) 0px 1px 3px;
+    }
+    .summary-mode-pill:not(.active):hover {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+
     .platform-tag {
       font-size: 0.65rem;
-      padding: 0.125rem 0.375rem;
-      border-radius: 4px;
+      padding: 0.125rem 0.5rem;
+      border-radius: var(--radius-pill);
       font-weight: 500;
       display: inline-flex;
       align-items: center;
-      background-color: #e6f7f5;
-      color: #0d9488;
-      white-space: nowrap; /* 防止换行 */
-      flex-shrink: 0; /* 防止被压缩 */
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: -0.01em;
     }
     
     /* 标签容器动态内边距样式 */
@@ -172,7 +208,7 @@
     }
     
     .toggle-switch input:checked + .toggle-slider {
-      background-color: #3b82f6;
+      background-color: var(--primary-color);
     }
     
     .toggle-switch input:checked + .toggle-slider:before {
@@ -253,37 +289,35 @@
     }
     
     .message-user {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      border: 1px solid #bfdbfe;
-      border-left: 4px solid #3b82f6;
-      margin-bottom: 16px;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.08);
+      background: rgba(94, 106, 210, 0.04);
+      border: 1px solid rgba(94, 106, 210, 0.12);
+      border-left: 3px solid var(--primary-color);
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
       position: relative;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
-    
+
     .message-user:hover {
-      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.12);
-      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
     
     .message-ai {
-      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-      border: 1px solid #e5e7eb;
-      border-left: 4px solid #10b981;
-      margin-bottom: 16px;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.08);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid #10b981;
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
       position: relative;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
-    
+
     .message-ai:hover {
-      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.12);
-      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
     
     .message-sender {
@@ -300,12 +334,12 @@
     }
     
     .message-user .message-sender {
-      background-color: rgba(59, 130, 246, 0.1);
-      color: #1e40af;
+      background-color: var(--primary-light);
+      color: var(--primary-color);
     }
-    
+
     .message-ai .message-sender {
-      background-color: rgba(16, 185, 129, 0.1);
+      background-color: rgba(16, 185, 129, 0.08);
       color: #047857;
     }
     
@@ -318,7 +352,7 @@
     }
     
     .message-user .message-sender::before {
-      background-color: #3b82f6;
+      background-color: var(--primary-color);
     }
     
     .message-ai .message-sender::before {
@@ -353,7 +387,7 @@
       left: 0;
       right: 0;
       height: 40px;
-      background: linear-gradient(transparent, #dbeafe);
+      background: linear-gradient(transparent, rgba(94, 106, 210, 0.04));
       pointer-events: none;
     }
     
@@ -374,20 +408,19 @@
       gap: 4px;
       margin-top: 8px;
       padding: 4px 8px;
-      background-color: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      border-radius: 6px;
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+      border: 1px solid rgba(94, 106, 210, 0.15);
+      border-radius: var(--radius-sm);
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
-    
+
     .message-toggle:hover {
-      background-color: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.3);
-      transform: translateY(-1px);
+      background-color: rgba(94, 106, 210, 0.12);
+      border-color: rgba(94, 106, 210, 0.25);
     }
     
     .message-toggle i {
@@ -414,60 +447,61 @@
     
     /* 滚动条美化 */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
     }
-    
+
     ::-webkit-scrollbar-track {
       background: transparent;
     }
-    
+
     ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: rgba(0, 0, 0, 0.12);
       border-radius: 3px;
     }
-    
+
     ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+      background: rgba(0, 0, 0, 0.2);
     }
     
     /* 侧边栏样式 */
     .sidebar {
-      width: 60px;
-      background-color: #ffffff;
-      border-left: 1px solid var(--border-color);
+      width: 52px;
+      background-color: var(--bg-surface);
+      border-left: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px 0;
-      gap: 16px;
+      padding: 12px 0;
+      gap: 4px;
       flex-shrink: 0;
-      order: 2; /* 放在右侧 */
+      order: 2;
     }
     
     .sidebar-btn {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border: none;
       background: transparent;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
-      color: #6b7280;
-      font-size: 16px;
+      transition: all 0.15s ease;
+      color: var(--text-tertiary);
+      font-size: 15px;
     }
-    
+
     .sidebar-btn:hover {
-      background-color: #f3f4f6;
+      background-color: rgba(0, 0, 0, 0.04);
       color: #374151;
     }
     
     .sidebar-btn.active {
-      background-color: #3b82f6;
+      background-color: var(--primary-color);
       color: white;
+      box-shadow: rgba(94, 106, 210, 0.25) 0px 1px 3px;
     }
     
     /* 主要内容区域 */
@@ -498,7 +532,7 @@
     }
     
     .date-grid button:focus {
-      outline: 2px solid #3b82f6;
+      outline: 2px solid #5e6ad2;
       outline-offset: -2px;
     }
     
@@ -517,7 +551,7 @@
     /* 日期输入框焦点样式 */
     input[readonly]:focus {
       outline: none;
-      border-color: #3b82f6;
+      border-color: #5e6ad2;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     
@@ -663,15 +697,47 @@
   <div class="main-container">
     <!-- 数据概览（total/today）已按需求移除 -->
 
-    <!-- 记忆列表标签页 -->
-    <div id="memories-content" class="tab-content active flex-1 flex flex-col p-2">
-      <!-- 搜索框 -->
-      <div id="search-container" class="mb-2 relative">
+    <!-- 采集注意力标签页（合并 AI Chat 与片段） -->
+    <div id="attention-content" class="tab-content active flex-1 flex flex-col p-2">
+      <!-- 第一行：导航筛选 pills -->
+      <div id="attention-filter-pills" class="flex items-center gap-1 mb-2">
+        <button data-filter="all" class="attention-pill active px-3 py-1 text-xs font-medium rounded-full bg-[#5e6ad2] text-white transition-colors">全部</button>
+        <button data-filter="aichat" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">AIChat</button>
+        <button data-filter="highlight" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">划词</button>
+        <button data-filter="dwell" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">停留</button>
+        <button data-filter="history" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">未读</button>
+      </div>
+
+      <!-- 第二行：操作按钮 + 搜索 -->
+      <div class="flex items-center gap-2 mb-2">
+        <div id="attention-actions" class="flex items-center gap-1 flex-shrink-0">
+          <button
+            id="toggle-snippet-merge-mode"
+            class="px-2 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+          >
+            选择合并
+          </button>
+          <button
+            id="merge-selected-snippets"
+            class="hidden px-2 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors opacity-50 cursor-not-allowed whitespace-nowrap"
+            disabled
+          >
+            合并所选
+          </button>
+          <button
+            id="save-current-page-snippet"
+            class="px-2 py-1.5 text-xs font-medium bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] rounded-lg hover:bg-[rgba(94,106,210,0.12)] transition-colors whitespace-nowrap"
+            data-i18n="saveCurrentPage"
+          >
+            保存当前页
+          </button>
+        </div>
+        <div id="search-container" class="flex-1 relative">
         <div class="relative">
           <input 
             type="text" 
             id="search-input" 
-            class="w-full pl-8 pr-16 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+            class="w-full pl-8 pr-16 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent transition-all duration-200" 
             data-i18n-placeholder="searchPlaceholder" 
             placeholder="搜索对话标题或内容..."
           >
@@ -689,7 +755,7 @@
             </button>
             <button 
               id="filter-toggle" 
-              class="p-1 mr-2 flex items-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all duration-200 relative"
+              class="p-1 mr-2 flex items-center text-gray-400 hover:text-[#5e6ad2] hover:bg-[rgba(94,106,210,0.08)] rounded transition-all duration-200 relative"
               data-i18n-title="filter"
               title="筛选"
             >
@@ -709,8 +775,8 @@
               
               <!-- 快捷日期选项 -->
               <div class="flex flex-wrap gap-2 mb-3 items-center">
-                <button id="date-week" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded transition-all duration-200" data-i18n="lastWeek">最近一周</button>
-                <button id="date-month" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded transition-all duration-200" data-i18n="lastMonth">最近一月</button>
+                <button id="date-week" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-[rgba(94,106,210,0.12)] hover:text-[#5e6ad2] rounded transition-all duration-200" data-i18n="lastWeek">最近一周</button>
+                <button id="date-month" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-[rgba(94,106,210,0.12)] hover:text-[#5e6ad2] rounded transition-all duration-200" data-i18n="lastMonth">最近一月</button>
               </div>
               
               <!-- 日期输入框 -->
@@ -721,7 +787,7 @@
                     <input 
                       type="text" 
                       id="start-date" 
-                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent cursor-pointer"
                       placeholder="yyyy/mm/dd"
                       readonly
                     >
@@ -782,7 +848,7 @@
                         <div class="date-grid grid grid-cols-7 gap-1"></div>
                         <!-- 底部按钮 -->
                         <div class="flex justify-center mt-3 pt-2 border-t border-gray-100">
-                          <button type="button" class="date-today-btn text-xs text-blue-600 hover:text-blue-800 font-medium">今天</button>
+                          <button type="button" class="date-today-btn text-xs text-[#5e6ad2] hover:text-[#4a55b0] font-medium">今天</button>
                         </div>
                       </div>
                     </div>
@@ -794,7 +860,7 @@
                     <input 
                       type="text" 
                       id="end-date" 
-                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent cursor-pointer"
                       placeholder="yyyy/mm/dd"
                       readonly
                     >
@@ -855,7 +921,7 @@
                         <div class="date-grid grid grid-cols-7 gap-1"></div>
                         <!-- 底部按钮 -->
                         <div class="flex justify-center mt-3 pt-2 border-t border-gray-100">
-                          <button type="button" class="date-today-btn text-xs text-blue-600 hover:text-blue-800 font-medium">今天</button>
+                          <button type="button" class="date-today-btn text-xs text-[#5e6ad2] hover:text-[#4a55b0] font-medium">今天</button>
                         </div>
                       </div>
                     </div>
@@ -871,7 +937,7 @@
                 <!-- 已选择的平台标签容器 -->
                 <div 
                   id="platform-tags-container" 
-                  class="min-h-[2.5rem] w-full px-3 py-2 bg-white border border-gray-300 rounded-md transition-all duration-200 cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="min-h-[2.5rem] w-full px-3 py-2 bg-white border border-gray-300 rounded-md transition-all duration-200 cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent"
                   tabindex="0"
                 >
                   <div id="platform-tags" class="flex flex-wrap gap-1 items-center">
@@ -891,7 +957,7 @@
             <div class="flex gap-2 pt-0">
               <button 
                 id="apply-filter" 
-                class="flex-1 px-4 py-2 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200"
+                class="flex-1 px-4 py-2 text-xs font-medium bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] rounded-md hover:bg-[rgba(94,106,210,0.12)] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:ring-offset-1 transition-all duration-200"
                 data-i18n="applyFilter"
               >
                 <i class="fas fa-check mr-1"></i>应用筛选
@@ -908,15 +974,15 @@
         </div>
         
         <!-- 搜索结果信息栏 -->
-        <div id="search-result-info" class="hidden mt-2 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-md px-2 py-1">
-          <div class="flex items-center text-xs text-blue-700">
+        <div id="search-result-info" class="hidden mt-2 flex items-center justify-between bg-[rgba(94,106,210,0.08)] border border-[rgba(94,106,210,0.2)] rounded-md px-2 py-1">
+          <div class="flex items-center text-xs text-[#5e6ad2]">
             <i class="fas fa-info-circle mr-1.5 text-xs"></i>
             <span id="result-count-text" data-i18n="foundItems" data-i18n-args='{"count": 0}'>找到 0 条</span>
           </div>
           <div class="flex items-center gap-1.5">
             <button 
               id="multi-select-toggle" 
-              class="px-2 py-1 text-xs text-gray-500 rounded hover:bg-blue-100 hover:text-blue-700 focus:outline-none transition-all duration-200 flex items-center gap-1"
+              class="px-2 py-1 text-xs text-gray-500 rounded hover:bg-[rgba(94,106,210,0.12)] hover:text-[#5e6ad2] focus:outline-none transition-all duration-200 flex items-center gap-1"
               data-i18n-title="multiSelectMode"
             >
               <i class="fas fa-tasks text-xs"></i>
@@ -925,7 +991,7 @@
             <div class="relative">
               <button 
                 id="export-filtered-btn" 
-                class="px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none transition-all duration-200 flex items-center gap-1 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                class="px-2 py-1 text-xs font-medium bg-[#5e6ad2] text-white rounded hover:bg-[#5e6ad2] focus:outline-none transition-all duration-200 flex items-center gap-1 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 data-i18n-title="exportFilterResults"
               >
                 <i class="fas fa-download text-xs"></i>
@@ -946,119 +1012,40 @@
           </div>
         </div>
       </div>
-      
-      <!-- 加载中 -->
-      <div id="memories-loading" class="flex-1 flex items-center justify-center">
-        <div class="text-center">
-          <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
-          <p class="text-gray-500" data-i18n="loadingMemories">加载记忆中...</p>
-        </div>
-      </div>
-      
-      <!-- 空状态 -->
-      <div id="memories-empty" class="hidden flex-1 flex items-center justify-center">
-        <div class="text-center">
-          <i class="fas fa-brain text-4xl text-gray-300 mb-3"></i>
-          <p class="text-gray-500 mb-2" data-i18n="noMemoriesSaved">还没有保存任何记忆</p>
-          <p id="memories-empty-subtitle" class="text-sm text-gray-400" data-i18n="visitSupportedPages">访问支持的 AI 聊天页面开始记录对话</p>
-        </div>
-      </div>
-      
-      <!-- 记忆列表 -->
-      <div id="memories-list" class="hidden flex-1 overflow-y-auto">
-        <div class="grid gap-2 grid-cols-1 pb-2">
-          <!-- 卡片将通过JavaScript动态插入 -->
-        </div>
-      </div>
-    </div>
-
-    <div id="snippets-content" class="tab-content hidden flex-1 flex flex-col p-2">
-      <div class="flex items-center justify-between gap-2 mb-3">
-        <div>
-          <h2 class="text-sm font-semibold text-gray-800" data-i18n="snippets">片段</h2>
-          <p class="text-xs text-gray-500" data-i18n="snippetsDescription">网页浏览和划词记录</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button
-            id="toggle-snippet-merge-mode"
-            class="px-3 py-2 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            选择合并
-          </button>
-          <button
-            id="merge-selected-snippets"
-            class="px-3 py-2 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors opacity-50 cursor-not-allowed"
-            disabled
-          >
-            合并所选
-          </button>
-          <button
-            id="save-current-page-snippet"
-            class="px-3 py-2 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-            data-i18n="saveCurrentPage"
-          >
-            保存当前页
-          </button>
-        </div>
       </div>
 
-      <div id="snippet-merge-hint" class="hidden text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-3">
+      <div id="snippet-merge-hint" class="hidden text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-2">
         选择同一页面、同一来源的高亮记录进行合并。默认保留第一条选中的记录。
       </div>
 
-      <div class="flex items-center justify-between mb-3">
+      <!-- 当前页面状态 -->
+      <div class="flex items-center justify-between mb-2">
         <span class="text-xs text-gray-500" data-i18n="currentPageStatus">当前页面状态</span>
         <span id="current-page-snippet-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">未保存</span>
       </div>
 
-      <div class="grid gap-2 mb-3">
-        <input
-          id="snippet-search-input"
-          type="text"
-          class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
-          data-i18n-attr="placeholder"
-          data-i18n-key="snippetSearchPlaceholder"
-          placeholder="搜索标题、正文或域名"
-        >
-        <div class="grid grid-cols-3 gap-2">
-          <select id="snippet-type-filter" class="text-xs border border-gray-200 rounded-lg px-2 py-2 bg-white">
-            <option value="all" data-i18n="snippetFilterAllTypes">全部类型</option>
-            <option value="highlight" data-i18n="snippetFilterHighlights">高亮</option>
-            <option value="dwell" data-i18n="snippetFilterDwell">停留</option>
-            <option value="page_save" data-i18n="snippetFilterPageSave">页面保存</option>
-            <option value="media_save">媒体</option>
-          </select>
-          <select id="snippet-source-filter" class="text-xs border border-gray-200 rounded-lg px-2 py-2 bg-white">
-            <option value="all" data-i18n="snippetFilterAllSources">全部来源</option>
-            <option value="web_page" data-i18n="snippetFilterWeb">网页</option>
-            <option value="ai_conversation" data-i18n="snippetFilterAi">AI</option>
-          </select>
-          <select id="snippet-date-filter" class="text-xs border border-gray-200 rounded-lg px-2 py-2 bg-white">
-            <option value="all" data-i18n="snippetFilterAllTime">全部时间</option>
-            <option value="today" data-i18n="snippetFilterToday">今天</option>
-            <option value="7d" data-i18n="snippetFilter7Days">7天</option>
-            <option value="30d" data-i18n="snippetFilter30Days">30天</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="snippets-loading" class="flex-1 flex items-center justify-center">
+      <!-- 加载中 -->
+      <div id="attention-loading" class="flex-1 flex items-center justify-center">
         <div class="text-center">
           <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
-          <p class="text-gray-500" data-i18n="loadingSnippets">加载片段中...</p>
+          <p class="text-gray-500">加载中...</p>
         </div>
       </div>
 
-      <div id="snippets-empty" class="hidden flex-1 flex items-center justify-center">
+      <!-- 空状态 -->
+      <div id="attention-empty" class="hidden flex-1 flex items-center justify-center">
         <div class="text-center">
-          <i class="fas fa-highlighter text-4xl text-gray-300 mb-3"></i>
-          <p class="text-gray-500 mb-2" data-i18n="noSnippetsSaved">还没有保存任何片段</p>
-          <p class="text-sm text-gray-400" data-i18n="snippetsEmptyHint">浏览网页或划词后，记录会出现在这里</p>
+          <i class="fas fa-layer-group text-4xl text-gray-300 mb-3"></i>
+          <p class="text-gray-500 mb-2">还没有采集任何注意力</p>
+          <p id="attention-empty-subtitle" class="text-sm text-gray-400">访问 AI 聊天页面或浏览网页开始记录</p>
         </div>
       </div>
 
-      <div id="snippets-list" class="hidden flex-1 overflow-y-auto">
-        <div class="grid gap-2 grid-cols-1 pb-2"></div>
+      <!-- 统一列表 -->
+      <div id="attention-list" class="hidden flex-1 overflow-y-auto">
+        <div class="grid gap-2 grid-cols-1 pb-2">
+          <!-- 卡片将通过JavaScript动态插入 -->
+        </div>
       </div>
     </div>
     
@@ -1067,12 +1054,12 @@
       <!-- 头部信息区，固定在顶部 -->
       <div class="sticky top-0 z-10 bg-white border-b pb-2">
         <div class="flex items-center p-3 pb-2">
-          <button id="back-to-list" class="text-blue-500 mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
+          <button id="back-to-list" class="text-[#5e6ad2] mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
             <i class="fas fa-arrow-left"></i>
           </button>
           <div class="flex-1 flex items-center min-w-0 mr-2">
             <h2 id="detail-title" class="text-lg font-medium truncate cursor-pointer flex-1 min-w-0"></h2>
-            <input id="detail-title-input" class="text-lg font-medium bg-transparent border border-blue-300 rounded px-2 py-1 outline-none focus:border-blue-500 hidden flex-1 min-w-0" type="text">
+            <input id="detail-title-input" class="text-lg font-medium bg-transparent border border-[rgba(94,106,210,0.25)] rounded px-2 py-1 outline-none focus:border-[#5e6ad2] hidden flex-1 min-w-0" type="text">
           </div>
           <button id="edit-title" class="text-gray-500 hover:bg-gray-100 rounded flex-shrink-0 transition-colors w-8 h-8 flex items-center justify-center">
             <i id="edit-title-icon" class="fas fa-edit"></i>
@@ -1125,7 +1112,7 @@
     <div id="snippet-detail" class="tab-content hidden flex-1 flex flex-col">
       <div class="sticky top-0 z-10 bg-white border-b pb-2">
         <div class="flex items-center p-3 pb-2">
-          <button id="back-to-snippets" class="text-blue-500 mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
+          <button id="back-to-snippets" class="text-[#5e6ad2] mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
             <i class="fas fa-arrow-left"></i>
           </button>
           <div class="flex-1 min-w-0">
@@ -1187,7 +1174,7 @@
         <input id="title-input" type="text" class="w-full border rounded p-2 mb-4" data-i18n="inputNewTitle" placeholder="输入新标题">
         <div class="flex justify-end space-x-2">
           <button id="cancel-edit" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100" data-i18n="cancel">取消</button>
-          <button id="save-title" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" data-i18n="save">保存</button>
+          <button id="save-title" class="px-4 py-2 bg-[#5e6ad2] text-white rounded hover:bg-[#5e6ad2]" data-i18n="save">保存</button>
         </div>
       </div>
     </div>
@@ -1204,6 +1191,93 @@
       </div>
     </div>
     
+    <!-- 总结注意力页面 -->
+    <div id="summary-content" class="tab-content hidden flex-1 flex flex-col p-2">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-sm font-semibold text-gray-800">总结注意力</h2>
+          <p class="text-xs text-gray-500">你最近关注了什么</p>
+        </div>
+      </div>
+
+      <!-- 模式选择 -->
+      <div class="flex items-center gap-2 mb-3">
+        <button data-summary-mode="weekly" class="summary-mode-pill active px-3 py-1 text-xs font-medium rounded-full bg-[#5e6ad2] text-white transition-colors">AI 互动周报</button>
+        <button data-summary-mode="topic" class="summary-mode-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">主题复盘</button>
+        <button data-summary-mode="psychology" class="summary-mode-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">心理洞察</button>
+      </div>
+
+      <!-- 主题输入（仅 topic 模式） -->
+      <div id="topic-input-group" class="hidden mb-3">
+        <input id="summary-topic-input" type="text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[rgba(94,106,210,0.15)] focus:border-[rgba(94,106,210,0.25)]" placeholder="输入要复盘的主题，如：产品设计、AI Agent...">
+      </div>
+
+      <!-- 生成按钮 -->
+      <button id="generate-summary-btn" class="w-full py-2.5 text-sm font-medium bg-[#5e6ad2] text-white rounded-lg hover:bg-[#5e6ad2] transition-colors mb-3 flex items-center justify-center gap-2">
+        <i class="fas fa-magic"></i>
+        <span>生成总结</span>
+      </button>
+
+      <!-- 加载状态 -->
+      <div id="summary-loading" class="hidden flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <i class="fas fa-spinner fa-spin text-2xl text-[#828fff] mb-2"></i>
+          <p class="text-sm text-gray-500">正在分析你的注意力数据...</p>
+          <p class="text-xs text-gray-400 mt-1">这可能需要 10-30 秒</p>
+        </div>
+      </div>
+
+      <!-- 结果展示 -->
+      <div id="summary-result" class="hidden flex-1 overflow-y-auto">
+        <div id="summary-result-content" class="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed prose-sm"></div>
+      </div>
+
+      <!-- 空状态 -->
+      <div id="summary-empty" class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <i class="fas fa-brain text-4xl text-gray-300 mb-3"></i>
+          <p class="text-gray-500 mb-2">选择分析模式，点击生成</p>
+          <p class="text-xs text-gray-400">需要在设置页配置 LLM API Key</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 推荐注意力页面 -->
+    <div id="recommend-content" class="tab-content hidden flex-1 flex flex-col p-2">
+      <div class="mb-3">
+        <h2 class="text-sm font-semibold text-gray-800">发现注意力</h2>
+        <p class="text-xs text-gray-500">你不知道但需要知道的</p>
+      </div>
+
+      <!-- 探索方向 -->
+      <div id="explore-directions" class="bg-[rgba(94,106,210,0.08)] rounded-lg border border-[rgba(94,106,210,0.15)] p-3 mb-3">
+        <span class="text-xs font-medium text-[#5e6ad2] block mb-2"><i class="fas fa-compass mr-1"></i>探索方向</span>
+        <div id="directions-list" class="flex flex-wrap gap-2">
+          <span class="text-xs text-[#828fff] italic">请先在总结页生成关键词</span>
+        </div>
+      </div>
+
+      <!-- 推荐卡片列表 -->
+      <div id="recommend-loading" class="hidden flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+          <p class="text-gray-500 text-sm">获取推荐中...</p>
+        </div>
+      </div>
+
+      <div id="recommend-empty" class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <i class="fas fa-compass text-4xl text-gray-300 mb-3"></i>
+          <p class="text-gray-500 mb-2">还没有推荐内容</p>
+          <p class="text-sm text-gray-400">总结页生成关键词后，这里会出现推荐</p>
+        </div>
+      </div>
+
+      <div id="recommend-list" class="hidden flex-1 overflow-y-auto">
+        <div class="grid gap-2 grid-cols-1 pb-2"></div>
+      </div>
+    </div>
+
     <!-- 设置标签页 -->
     <div id="settings-content" class="tab-content hidden flex-1 overflow-y-auto p-2">
       <!-- 基础设置 -->
@@ -1226,6 +1300,39 @@
               </div>
             </label>
           </div>
+        </div>
+      </div>
+
+      <!-- LLM API 配置 -->
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-3">
+        <h3 class="text-sm font-medium mb-4 flex items-center">
+          <i class="fas fa-robot mr-2 text-gray-500"></i>LLM API 配置
+        </h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">服务商</label>
+            <select id="llm-provider" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white">
+              <option value="bailian">阿里百炼 (DashScope)</option>
+              <option value="openai">OpenAI</option>
+              <option value="custom">自定义 (OpenAI 兼容)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">API Key</label>
+            <input id="llm-api-key" type="password" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="sk-...">
+          </div>
+          <div id="llm-base-url-group" class="hidden">
+            <label class="block text-xs font-medium text-gray-600 mb-1">Base URL</label>
+            <input id="llm-base-url" type="text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="https://api.example.com/v1">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">模型</label>
+            <input id="llm-model" type="text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="qwen-plus" value="qwen-plus">
+          </div>
+          <button id="save-llm-config" class="w-full py-2 text-xs font-medium bg-[#5e6ad2] text-white rounded-lg hover:bg-[#5e6ad2] transition-colors">
+            保存 LLM 配置
+          </button>
+          <div id="llm-config-status" class="text-xs text-gray-500 text-center hidden"></div>
         </div>
       </div>
 
@@ -1350,13 +1457,13 @@
           </div>
           
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div id="storage-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+            <div id="storage-bar" class="bg-[#5e6ad2] h-2 rounded-full transition-all" style="width: 0%"></div>
           </div>
           
           <div class="space-y-2">
             <div class="flex gap-2">
               <div class="flex-1 relative">
-                <button id="export-btn" class="w-full bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center relative">
+                <button id="export-btn" class="w-full bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] px-3 py-2 rounded-lg text-sm font-medium hover:bg-[rgba(94,106,210,0.12)] transition-colors flex items-center justify-center relative">
                   <i class="fas fa-download mr-1.5"></i><span data-i18n="exportData">导出数据</span>
                   <i class="fas fa-chevron-down text-xs absolute right-3"></i>
                 </button>
@@ -1431,7 +1538,7 @@
             </button>
             <button
               id="local-store-retry-migration"
-              class="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+              class="flex-1 bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] px-3 py-2 rounded-lg text-xs font-medium hover:bg-[rgba(94,106,210,0.12)] transition-colors"
             >
               重试迁移
             </button>
@@ -1474,13 +1581,16 @@
   
   <!-- 侧边栏导航 -->
   <div class="sidebar">
-    <button id="tab-memories" class="sidebar-btn active">
+    <button id="tab-attention" class="sidebar-btn active" title="采集注意力">
+      <i class="fas fa-layer-group"></i>
+    </button>
+    <button id="tab-summary" class="sidebar-btn" title="总结注意力">
       <i class="fas fa-brain"></i>
     </button>
-    <button id="tab-snippets" class="sidebar-btn">
-      <i class="fas fa-highlighter"></i>
+    <button id="tab-recommend" class="sidebar-btn" title="推荐注意力">
+      <i class="fas fa-compass"></i>
     </button>
-    <button id="tab-settings" class="sidebar-btn">
+    <button id="tab-settings" class="sidebar-btn" title="设置">
       <i class="fas fa-cog"></i>
     </button>
   </div>
@@ -1494,7 +1604,7 @@
         </div>
         <h3 class="text-lg font-medium text-gray-900 mb-2" data-i18n="confirmClearAllData">确认清空所有数据？</h3>
         <p class="text-sm text-gray-500 mb-2" data-i18n="clearDataWarning">此操作将永久删除所有保存的对话记录，且无法恢复。</p>
-        <p class="text-sm text-blue-600 mb-6" data-i18n="refreshPageAfterClear">清空完成后，请刷新网页以确保数据同步。</p>
+        <p class="text-sm text-[#5e6ad2] mb-6" data-i18n="refreshPageAfterClear">清空完成后，请刷新网页以确保数据同步。</p>
         <div class="flex gap-3">
           <button id="cancel-clear" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" data-i18n="cancel">
             取消
