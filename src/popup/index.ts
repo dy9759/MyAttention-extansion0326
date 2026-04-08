@@ -1484,6 +1484,8 @@ async function handleCreateSummaryTask(): Promise<void> {
       mode: currentSummaryMode,
       topic,
       conversations: cachedConversations,
+      snippets: cachedSnippets,
+      history: cachedHistory,
     });
     showToast('任务已创建', 'success');
     void refreshSummaryTasks();

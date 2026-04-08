@@ -581,6 +581,8 @@ const messageHandlersMap: Record<
       mode: params.mode || 'weekly',
       topic: params.topic,
       conversations: params.conversations || [],
+      snippets: params.snippets || [],
+      history: params.history || [],
     });
   },
 
