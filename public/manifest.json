@@ -19,7 +19,7 @@
   ],
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
-  "host_permissions": ["http://127.0.0.1:1995/*"],
+  "host_permissions": ["http://127.0.0.1:1995/*", "http://127.0.0.1:1996/*"],
   "icons": {
     "128": "icons/logo_128.png",
     "16": "icons/logo_16.png",

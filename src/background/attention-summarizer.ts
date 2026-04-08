@@ -6,6 +6,7 @@
 import { Logger } from '@/core/errors';
 import { callLlm, type LlmMessage } from './llm-client';
 import type { AppSettings, Conversation, Snippet, BrowsingHistoryItem } from '@/types';
+import { notifySummaryStarted, notifySummaryCompleted } from './myisland-client';
 
 // ============================================================================
 // 类型定义
@@ -270,6 +271,9 @@ async function runTask(taskId: string, params: {
     const modeLabel = MODE_LABELS[params.mode] || params.mode;
     await updateTaskStatus(taskId, 'running', `正在生成${modeLabel}...`);
 
+    // 推送到 MyIsland
+    notifySummaryStarted(taskId, params.mode, params.topic, params.conversations.length);
+
     const { mode, topic, conversations, snippets, history } = params;
     const hasAnyData = conversations.length || (snippets && snippets.length) || (history && history.length);
 
@@ -309,10 +313,16 @@ async function runTask(taskId: string, params: {
     const result = await callLlm(llmConfig, { messages, temperature: 0.7, maxTokens: 4096 });
     await completeTask(taskId, result);
 
+    // 推送到 MyIsland
+    notifySummaryCompleted(taskId, params.mode, params.topic, 'done', result);
+
     Logger.info(`[Summarizer] 任务 ${taskId} 完成`);
   } catch (error) {
     Logger.error(`[Summarizer] 任务 ${taskId} 失败`, error);
     await updateTaskStatus(taskId, 'error', undefined, error instanceof Error ? error.message : String(error));
+
+    // 推送到 MyIsland
+    notifySummaryCompleted(taskId, params.mode, params.topic, 'error');
   }
 }
 

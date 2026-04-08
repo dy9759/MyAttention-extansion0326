@@ -25,6 +25,7 @@ import { FIRST_OPEN_WELCOME_PENDING_KEY } from '@/core/first-open';
 import { fetchBrowsingHistory } from './history-tracker';
 import { createSummaryTask, getSummaryTasks, getSummaryTaskResult } from './attention-summarizer';
 import { startTabMonitor, cleanupTabMonitor } from './tab-monitor';
+import { notifySummaryCompleted } from './myisland-client';
 
 // ============================================================================
 // 初始化设置
@@ -947,6 +948,31 @@ async function handleContextMenuClick(
 /**
  * 初始化应用
  */
+/**
+ * 同步已有总结任务到 MyIsland（启动时调用一次）
+ */
+async function syncExistingTasksToMyIsland(): Promise<void> {
+  try {
+    const tasks = await getSummaryTasks();
+    console.log(`[MyIsland Sync] Found ${tasks.length} tasks, statuses:`, tasks.map(t => `${t.id}:${t.status}`));
+    for (const task of tasks) {
+      if (task.status === 'done' || task.status === 'error') {
+        const result = await getSummaryTaskResult(task.id);
+        console.log(`[MyIsland Sync] Syncing task ${task.id} (${task.mode}, ${task.status}), hasResult: ${!!result?.result}`);
+        notifySummaryCompleted(
+          task.id,
+          task.mode,
+          task.topic,
+          task.status as 'done' | 'error',
+          result?.result?.slice(0, 500)
+        );
+      }
+    }
+  } catch (e) {
+    console.warn('[MyIsland Sync] Failed to sync tasks:', e);
+  }
+}
+
 async function initialize(): Promise<void> {
   Logger.info('[Background] 初始化 My Attention 后台服务');
 
@@ -983,6 +1009,9 @@ async function initialize(): Promise<void> {
 
     // 启动后主动修复已打开标签页中的失效内容脚本（无页面刷新）
     await restoreContentScriptsForOpenTabs('background.initialize');
+
+    // 同步已有总结任务到 MyIsland（覆盖扩展安装前已完成的任务）
+    void syncExistingTasksToMyIsland();
 
     Logger.info('[Background] 后台服务初始化完成');
   } catch (error) {

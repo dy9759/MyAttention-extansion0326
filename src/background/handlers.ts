@@ -39,6 +39,7 @@ import {
   type ImportResult,
   type BrowserSyncStatus,
 } from './evermemos-client';
+import { notifyConversationUpdated } from './myisland-client';
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -89,6 +90,9 @@ export class MessageHandlers {
     // 通知侧边栏刷新
     this.notifySidebarRefresh();
 
+    // 推送到 MyIsland
+    notifyConversationUpdated(conversation as any);
+
     return conversationId;
   }
 
@@ -104,6 +108,9 @@ export class MessageHandlers {
 
     // 通知侧边栏刷新
     this.notifySidebarRefresh();
+
+    // 推送到 MyIsland
+    notifyConversationUpdated(conversation as any);
   }
 
   /**
@@ -378,6 +385,7 @@ export class MessageHandlers {
     await localStoreRepository.updateConversation(updatedConversation);
 
     this.notifySidebarRefresh();
+    notifyConversationUpdated(updatedConversation as any);
 
     return {
       success: true,
@@ -426,6 +434,7 @@ export class MessageHandlers {
     const updatedConversation = this.withUpdatedConversationMetadata(conversation, nextMessages);
     await localStoreRepository.updateConversation(updatedConversation);
     this.notifySidebarRefresh();
+    notifyConversationUpdated(updatedConversation as any);
 
     return {
       success: true,

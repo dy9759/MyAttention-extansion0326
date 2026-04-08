@@ -1510,17 +1510,22 @@ function stopSummaryPolling(): void {
 }
 
 async function refreshSummaryTasks(): Promise<void> {
+  if (popupContextInvalidated) {
+    stopSummaryPolling();
+    return;
+  }
+
   try {
     const response = await safeSendRuntimeMessage({ type: 'getSummaryTasks' });
     const tasks: any[] = (response as any)?.tasks || (response as any)?.data?.tasks || [];
     renderSummaryTaskList(tasks);
 
-    // 如果没有 running/pending 任务，停止轮询
     const hasActive = tasks.some((t: any) => t.status === 'running' || t.status === 'pending');
     if (!hasActive) {
       stopSummaryPolling();
     }
   } catch (error) {
+    stopSummaryPolling();
     logPopupError('获取总结任务', error);
   }
 }
