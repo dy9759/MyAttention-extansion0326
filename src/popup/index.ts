@@ -1420,6 +1420,13 @@ function handleDeleteConversation(detail: any): void {
 // ============================================================================
 
 let currentSummaryMode: 'weekly' | 'topic' | 'psychology' = 'weekly';
+let summaryPollTimer: ReturnType<typeof setInterval> | null = null;
+
+const MODE_LABELS: Record<string, string> = {
+  weekly: 'AI 互动周报',
+  topic: '主题复盘',
+  psychology: '心理洞察',
+};
 
 function initializeSummaryPage(): void {
   // 模式 pill 切换
@@ -1452,61 +1459,185 @@ function initializeSummaryPage(): void {
   const generateBtn = document.getElementById('generate-summary-btn');
   if (generateBtn) {
     generateBtn.addEventListener('click', () => {
-      void handleGenerateSummary();
+      void handleCreateSummaryTask();
     });
   }
-}
 
-async function handleGenerateSummary(): Promise<void> {
-  const loadingEl = document.getElementById('summary-loading');
-  const resultEl = document.getElementById('summary-result');
-  const resultContent = document.getElementById('summary-result-content');
-  const emptyEl = document.getElementById('summary-empty');
-  const generateBtn = document.getElementById('generate-summary-btn') as HTMLButtonElement | null;
-
-  // 显示加载状态
-  if (loadingEl) loadingEl.classList.remove('hidden');
-  if (resultEl) resultEl.classList.add('hidden');
-  if (emptyEl) emptyEl.classList.add('hidden');
-  if (generateBtn) {
-    generateBtn.disabled = true;
-    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>生成中...</span>';
+  // 返回按钮（结果详情 → 任务列表）
+  const backBtn = document.getElementById('summary-result-back');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      showSummaryTaskList();
+    });
   }
 
-  try {
-    const topic = (document.getElementById('summary-topic-input') as HTMLInputElement | null)?.value || '';
+  // 加载已有任务
+  void refreshSummaryTasks();
+}
 
-    // 获取最近7天的对话数据
-    const response = await safeSendRuntimeMessage({
-      type: 'generateSummary',
+async function handleCreateSummaryTask(): Promise<void> {
+  const topic = (document.getElementById('summary-topic-input') as HTMLInputElement | null)?.value || '';
+
+  try {
+    await safeSendRuntimeMessage({
+      type: 'createSummaryTask',
       mode: currentSummaryMode,
       topic,
       conversations: cachedConversations,
     });
-
-    const summary = (response as any)?.summary || (response as any)?.data?.summary;
-    const error = (response as any)?.error || (response as any)?.data?.error;
-
-    if (error) {
-      if (resultContent) resultContent.innerHTML = `<p class="text-red-500">${escapeHtml(error)}</p>`;
-    } else if (summary) {
-      if (resultContent) resultContent.innerHTML = renderMarkdownToHtml(summary);
-    } else {
-      if (resultContent) resultContent.innerHTML = '<p class="text-gray-400">未获取到总结结果</p>';
-    }
-
-    if (resultEl) resultEl.classList.remove('hidden');
+    showToast('任务已创建', 'success');
+    void refreshSummaryTasks();
+    startSummaryPolling();
   } catch (error) {
-    logPopupError('生成总结', error);
-    if (resultContent) {
-      resultContent.innerHTML = `<p class="text-red-500">生成失败：${escapeHtml(String(error))}</p>`;
+    logPopupError('创建总结任务', error);
+  }
+}
+
+function startSummaryPolling(): void {
+  stopSummaryPolling();
+  summaryPollTimer = setInterval(() => {
+    void refreshSummaryTasks();
+  }, 3000);
+}
+
+function stopSummaryPolling(): void {
+  if (summaryPollTimer) {
+    clearInterval(summaryPollTimer);
+    summaryPollTimer = null;
+  }
+}
+
+async function refreshSummaryTasks(): Promise<void> {
+  try {
+    const response = await safeSendRuntimeMessage({ type: 'getSummaryTasks' });
+    const tasks: any[] = (response as any)?.tasks || (response as any)?.data?.tasks || [];
+    renderSummaryTaskList(tasks);
+
+    // 如果没有 running/pending 任务，停止轮询
+    const hasActive = tasks.some((t: any) => t.status === 'running' || t.status === 'pending');
+    if (!hasActive) {
+      stopSummaryPolling();
     }
-    if (resultEl) resultEl.classList.remove('hidden');
-  } finally {
-    if (loadingEl) loadingEl.classList.add('hidden');
-    if (generateBtn) {
-      generateBtn.disabled = false;
-      generateBtn.innerHTML = '<i class="fas fa-magic"></i><span>生成总结</span>';
+  } catch (error) {
+    logPopupError('获取总结任务', error);
+  }
+}
+
+function showSummaryTaskList(): void {
+  const listEl = document.getElementById('summary-task-list');
+  const resultView = document.getElementById('summary-result-view');
+  const emptyEl = document.getElementById('summary-empty');
+  if (listEl) listEl.classList.remove('hidden');
+  if (resultView) resultView.classList.add('hidden');
+  if (emptyEl) emptyEl.classList.add('hidden');
+}
+
+function renderSummaryTaskList(tasks: any[]): void {
+  const listEl = document.getElementById('summary-task-list');
+  const emptyEl = document.getElementById('summary-empty');
+  const resultView = document.getElementById('summary-result-view');
+
+  if (!listEl) return;
+  // 如果结果详情正在显示，不覆盖
+  if (resultView && !resultView.classList.contains('hidden')) return;
+
+  if (!tasks.length) {
+    listEl.classList.add('hidden');
+    if (emptyEl) emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  if (emptyEl) emptyEl.classList.add('hidden');
+  listEl.classList.remove('hidden');
+
+  const container = listEl.querySelector('div') || listEl;
+  container.innerHTML = '';
+
+  tasks.forEach((task: any) => {
+    const card = document.createElement('div');
+    card.className = 'memory-card bg-white p-3 rounded-lg shadow-sm';
+
+    const modeLabel = MODE_LABELS[task.mode] || task.mode;
+    const topicSuffix = task.topic ? `: ${escapeHtml(task.topic)}` : '';
+    const time = formatTimestamp(task.createdAt);
+
+    let statusIcon = '';
+    let statusText = '';
+    let statusClass = '';
+    let clickable = false;
+
+    switch (task.status) {
+      case 'pending':
+        statusIcon = '<i class="fas fa-clock text-gray-400"></i>';
+        statusText = '等待中...';
+        statusClass = 'text-gray-400';
+        break;
+      case 'running':
+        statusIcon = '<i class="fas fa-spinner fa-spin text-brand"></i>';
+        statusText = task.progress || '生成中...';
+        statusClass = 'text-brand';
+        break;
+      case 'done':
+        statusIcon = '<i class="fas fa-check-circle text-green-500"></i>';
+        statusText = '已完成';
+        statusClass = 'text-green-600';
+        clickable = true;
+        break;
+      case 'error':
+        statusIcon = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+        statusText = task.error || '失败';
+        statusClass = 'text-red-500';
+        break;
+    }
+
+    if (clickable) {
+      card.classList.add('cursor-pointer', 'hover:border-gray-300');
+      card.addEventListener('click', () => {
+        void viewSummaryResult(task.id, `${modeLabel}${topicSuffix}`);
+      });
+    }
+
+    card.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="flex-shrink-0">${statusIcon}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-gray-800 truncate">${escapeHtml(modeLabel)}${topicSuffix}</div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs ${statusClass}">${escapeHtml(statusText)}</span>
+            <span class="text-xs text-gray-300">&middot;</span>
+            <span class="text-xs text-gray-400">${time}</span>
+          </div>
+        </div>
+        ${clickable ? '<i class="fas fa-chevron-right text-gray-300 text-xs flex-shrink-0"></i>' : ''}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+async function viewSummaryResult(taskId: string, title: string): Promise<void> {
+  const listEl = document.getElementById('summary-task-list');
+  const resultView = document.getElementById('summary-result-view');
+  const resultContent = document.getElementById('summary-result-content');
+  const resultTitle = document.getElementById('summary-result-title');
+
+  if (listEl) listEl.classList.add('hidden');
+  if (resultView) resultView.classList.remove('hidden');
+  if (resultTitle) resultTitle.textContent = title;
+  if (resultContent) resultContent.innerHTML = '<i class="fas fa-spinner fa-spin text-gray-400"></i>';
+
+  try {
+    const response = await safeSendRuntimeMessage({ type: 'getSummaryTaskResult', taskId });
+    const result = (response as any)?.result || (response as any)?.data?.result;
+
+    if (resultContent) {
+      resultContent.innerHTML = result ? renderMarkdownToHtml(result) : '<p class="text-gray-400">无内容</p>';
+    }
+  } catch (error) {
+    logPopupError('获取总结结果', error);
+    if (resultContent) {
+      resultContent.innerHTML = `<p class="text-red-500">获取失败</p>`;
     }
   }
 }
@@ -2296,7 +2427,7 @@ function renderPlatformFilterOptions(): void {
         data-platform="${platform.id}"
       >
         <span>${platform.label}</span>
-        <i class="fas fa-check text-[#5e6ad2] hidden"></i>
+        <i class="fas fa-check text-brand hidden"></i>
       </button>
     `
   ).join('');
@@ -2331,7 +2462,7 @@ function refreshPlatformOptionState(): void {
       const icon = button.querySelector('i');
       const platform = button.dataset.platform as Conversation['platform'] | undefined;
       const selected = !!platform && selectedPlatforms.has(platform);
-      button.classList.toggle('bg-[rgba(94,106,210,0.08)]', selected);
+      button.classList.toggle('bg-brand-light', selected);
       if (icon) {
         icon.classList.toggle('hidden', !selected);
       }

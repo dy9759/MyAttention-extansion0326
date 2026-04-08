@@ -295,8 +295,8 @@ function createMultiSelectLayout(params: {
 }): string {
   const { conversation, isSelected } = params;
   const checkboxClass = isSelected
-    ? 'bg-[#5e6ad2] border-[#5e6ad2]'
-    : 'hover:border-[#828fff]';
+    ? 'btn-brand border-brand'
+    : '';
 
   return `
     <!-- 多选模式下的布局 -->
@@ -336,7 +336,7 @@ function createNormalLayout(params: {
       <h3 class="font-medium text-sm truncate flex-1">${safeTitle}</h3>
       <div class="flex items-center gap-1 card-action opacity-0 transition-opacity duration-200 flex-shrink-0">
         <button
-          class="edit-title text-gray-400 hover:text-[#5e6ad2] p-1 rounded"
+          class="edit-title text-gray-400 hover:text-brand p-1 rounded"
           title="${escapeHtml(safeGetMessage('editConversationTitle', 'Edit') || 'Edit')}"
           data-conversation-id="${conversation.conversationId}"
         >
@@ -344,7 +344,7 @@ function createNormalLayout(params: {
         </button>
         <button
           class="open-original
-          text-gray-400 hover:text-[#5e6ad2] p-1 rounded"
+          text-gray-400 hover:text-brand p-1 rounded"
           title="${escapeHtml(safeGetMessage('openOriginalPage', 'Open') || 'Open')}"
           data-conversation-id="${conversation.conversationId}"
         >

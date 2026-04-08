@@ -23,7 +23,7 @@ import { getBackgroundWebCaptureSettings } from './settings';
 import { localStoreSyncService } from './local-store-sync-service';
 import { FIRST_OPEN_WELCOME_PENDING_KEY } from '@/core/first-open';
 import { fetchBrowsingHistory } from './history-tracker';
-import { generateSummary, type SummaryRequest } from './attention-summarizer';
+import { createSummaryTask, getSummaryTasks, getSummaryTaskResult } from './attention-summarizer';
 import { startTabMonitor, cleanupTabMonitor } from './tab-monitor';
 
 // ============================================================================
@@ -576,23 +576,20 @@ const messageHandlersMap: Record<
     return { history };
   },
 
-  'generateSummary': async (params) => {
-    const settings = await new Promise<any>((resolve) => {
-      chrome.storage.sync.get(['settings'], (result) => resolve(result.settings || {}));
-    });
-    const llmConfig = settings.llmApi;
-    if (!llmConfig?.apiKey) {
-      return { error: '请先在设置页配置 LLM API Key' };
-    }
-
-    const request: SummaryRequest = {
+  'createSummaryTask': async (params) => {
+    return createSummaryTask({
       mode: params.mode || 'weekly',
       topic: params.topic,
       conversations: params.conversations || [],
-    };
+    });
+  },
 
-    const result = await generateSummary(llmConfig, request);
-    return { summary: result };
+  'getSummaryTasks': async () => {
+    return { tasks: await getSummaryTasks() };
+  },
+
+  'getSummaryTaskResult': async (params) => {
+    return await getSummaryTaskResult(params.taskId);
   },
 };
 
@@ -642,7 +639,7 @@ function setupMessageListeners(): void {
       }
 
       // LLM 调用等长时操作绕过 dispatcher 超时
-      const BYPASS_DISPATCHER_TYPES = new Set(['generateSummary']);
+      const BYPASS_DISPATCHER_TYPES = new Set(['createSummaryTask']);
 
       const dispatchPromise = (ENABLE_MESSAGE_DISPATCHER && !BYPASS_DISPATCHER_TYPES.has(message.type))
         ? messageDispatcher.dispatch({
@@ -747,23 +744,23 @@ async function refreshContextMenus(): Promise<void> {
 
     await createContextMenu({
       id: CONTEXT_MENU_IDS.SELECTION,
-      title: '保存选中文本到 SaySo-attention',
+      title: '保存选中文本到 My Attention',
       contexts: ['selection'],
     });
     await createContextMenu({
       id: CONTEXT_MENU_IDS.PAGE,
-      title: '保存当前页面片段到 SaySo-attention',
+      title: '保存当前页面片段到 My Attention',
       contexts: ['page'],
     });
     await createContextMenu({
       id: CONTEXT_MENU_IDS.LINK,
-      title: '保存链接文本到 SaySo-attention',
+      title: '保存链接文本到 My Attention',
       contexts: ['link'],
     });
     if (webCapture.mediaEnabled !== false) {
       await createContextMenu({
         id: CONTEXT_MENU_IDS.MEDIA,
-        title: '保存媒体到 SaySo-attention',
+        title: '保存媒体到 My Attention',
         contexts: ['image', 'video', 'audio'],
       });
     }
@@ -949,7 +946,7 @@ async function handleContextMenuClick(
  * 初始化应用
  */
 async function initialize(): Promise<void> {
-  Logger.info('[Background] 初始化 SaySo-attention 后台服务');
+  Logger.info('[Background] 初始化 My Attention 后台服务');
 
   try {
     // 初始化设置

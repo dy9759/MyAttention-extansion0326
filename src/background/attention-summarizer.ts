@@ -1,6 +1,6 @@
 /**
- * 注意力总结引擎
- * 基于采集的对话/片段数据，调用 LLM 生成总结报告
+ * 注意力总结引擎 — 异步任务模式
+ * 任务在后台执行，结果持久化到 chrome.storage.local
  */
 
 import { Logger } from '@/core/errors';
@@ -8,10 +8,31 @@ import { callLlm, type LlmMessage } from './llm-client';
 import type { AppSettings, Conversation } from '@/types';
 
 // ============================================================================
-// 提示词模板
+// 类型定义
 // ============================================================================
 
 export type SummaryMode = 'weekly' | 'topic' | 'psychology';
+
+export interface SummaryTask {
+  id: string;
+  mode: SummaryMode;
+  topic?: string;
+  status: 'pending' | 'running' | 'done' | 'error';
+  progress?: string;
+  error?: string;
+  createdAt: string;
+  completedAt?: string;
+  /** 结果不包含在列表查询中，需单独获取 */
+  hasResult?: boolean;
+}
+
+interface StoredTask extends SummaryTask {
+  result?: string;
+}
+
+// ============================================================================
+// 提示词模板
+// ============================================================================
 
 const PROMPT_WEEKLY = `# 背景
 你擅长从我与 AI 的海量、零散对话信息中，关注我的提问与回应，识别我的核心模式、提炼关键洞见，并提供富有远见的行动建议。请严格、客观、深刻地履行你的职责。
@@ -117,48 +138,179 @@ function formatConversationsForLlm(conversations: Conversation[], maxChars: numb
 }
 
 // ============================================================================
-// 总结生成
+// 持久化
 // ============================================================================
 
-export interface SummaryRequest {
-  mode: SummaryMode;
-  topic?: string; // 仅 mode=topic 时需要
-  conversations: Conversation[];
+const STORAGE_KEY = 'summaryTasks';
+const MAX_STORED_TASKS = 20;
+
+async function loadTasks(): Promise<StoredTask[]> {
+  return new Promise((resolve) => {
+    chrome.storage.local.get([STORAGE_KEY], (result) => {
+      resolve(Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : []);
+    });
+  });
 }
 
-export async function generateSummary(
-  config: NonNullable<AppSettings['llmApi']>,
-  request: SummaryRequest
-): Promise<string> {
-  const { mode, topic, conversations } = request;
+async function saveTasks(tasks: StoredTask[]): Promise<void> {
+  // 只保留最近 N 条
+  const trimmed = tasks.slice(0, MAX_STORED_TASKS);
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ [STORAGE_KEY]: trimmed }, resolve);
+  });
+}
 
-  if (!conversations.length) {
-    return '暂无对话记录可供分析。请先在 AI 聊天页面积累一些对话数据。';
+// ============================================================================
+// 任务管理 API
+// ============================================================================
+
+const MODE_LABELS: Record<SummaryMode, string> = {
+  weekly: 'AI 互动周报',
+  topic: '主题复盘',
+  psychology: '心理洞察',
+};
+
+/**
+ * 创建异步总结任务，立即返回 taskId
+ */
+export async function createSummaryTask(params: {
+  mode: SummaryMode;
+  topic?: string;
+  conversations: Conversation[];
+}): Promise<{ taskId: string }> {
+  const taskId = `task_${Date.now()}`;
+  const now = new Date().toISOString();
+
+  const task: StoredTask = {
+    id: taskId,
+    mode: params.mode,
+    topic: params.topic,
+    status: 'pending',
+    progress: '准备中...',
+    createdAt: now,
+  };
+
+  const tasks = await loadTasks();
+  tasks.unshift(task);
+  await saveTasks(tasks);
+
+  // 异步执行，不等待
+  void runTask(taskId, params);
+
+  return { taskId };
+}
+
+/**
+ * 后台执行任务
+ */
+async function runTask(taskId: string, params: {
+  mode: SummaryMode;
+  topic?: string;
+  conversations: Conversation[];
+}): Promise<void> {
+  try {
+    await updateTaskStatus(taskId, 'running', '正在获取 LLM 配置...');
+
+    const settings = await new Promise<any>((resolve) => {
+      chrome.storage.sync.get(['settings'], (result) => resolve(result.settings || {}));
+    });
+    const llmConfig = settings.llmApi;
+
+    if (!llmConfig?.apiKey) {
+      await updateTaskStatus(taskId, 'error', undefined, '请先在设置页配置 LLM API Key');
+      return;
+    }
+
+    const modeLabel = MODE_LABELS[params.mode] || params.mode;
+    await updateTaskStatus(taskId, 'running', `正在生成${modeLabel}...`);
+
+    const { mode, topic, conversations } = params;
+
+    if (!conversations.length) {
+      await completeTask(taskId, '暂无对话记录可供分析。请先在 AI 聊天页面积累一些对话数据。');
+      return;
+    }
+
+    let systemPrompt: string;
+    switch (mode) {
+      case 'weekly':
+        systemPrompt = PROMPT_WEEKLY;
+        break;
+      case 'topic':
+        systemPrompt = PROMPT_TOPIC.replace('[TOPIC]', topic || '（未指定主题）');
+        break;
+      case 'psychology':
+        systemPrompt = PROMPT_PSYCHOLOGY;
+        break;
+      default:
+        systemPrompt = PROMPT_WEEKLY;
+    }
+
+    const conversationText = formatConversationsForLlm(conversations);
+
+    const messages: LlmMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `以下是我的对话记录：\n${conversationText}` },
+    ];
+
+    Logger.info(`[Summarizer] 任务 ${taskId}: ${mode}, ${conversations.length} 条对话, ${conversationText.length} 字符`);
+
+    const result = await callLlm(llmConfig, { messages, temperature: 0.7, maxTokens: 4096 });
+    await completeTask(taskId, result);
+
+    Logger.info(`[Summarizer] 任务 ${taskId} 完成`);
+  } catch (error) {
+    Logger.error(`[Summarizer] 任务 ${taskId} 失败`, error);
+    await updateTaskStatus(taskId, 'error', undefined, error instanceof Error ? error.message : String(error));
   }
+}
 
-  let systemPrompt: string;
-  switch (mode) {
-    case 'weekly':
-      systemPrompt = PROMPT_WEEKLY;
-      break;
-    case 'topic':
-      systemPrompt = PROMPT_TOPIC.replace('[TOPIC]', topic || '（未指定主题）');
-      break;
-    case 'psychology':
-      systemPrompt = PROMPT_PSYCHOLOGY;
-      break;
-    default:
-      systemPrompt = PROMPT_WEEKLY;
-  }
+async function updateTaskStatus(taskId: string, status: SummaryTask['status'], progress?: string, errorMsg?: string): Promise<void> {
+  const tasks = await loadTasks();
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task) return;
 
-  const conversationText = formatConversationsForLlm(conversations);
+  task.status = status;
+  if (progress !== undefined) task.progress = progress;
+  if (errorMsg !== undefined) task.error = errorMsg;
+  if (status === 'error') task.completedAt = new Date().toISOString();
 
-  const messages: LlmMessage[] = [
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: `以下是我的对话记录：\n${conversationText}` },
-  ];
+  await saveTasks(tasks);
+}
 
-  Logger.info(`[Summarizer] 生成 ${mode} 总结, ${conversations.length} 条对话, ${conversationText.length} 字符`);
+async function completeTask(taskId: string, result: string): Promise<void> {
+  const tasks = await loadTasks();
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task) return;
 
-  return callLlm(config, { messages, temperature: 0.7, maxTokens: 4096 });
+  task.status = 'done';
+  task.result = result;
+  task.hasResult = true;
+  task.completedAt = new Date().toISOString();
+  task.progress = undefined;
+
+  await saveTasks(tasks);
+}
+
+/**
+ * 获取任务列表（不含 result 内容，减小传输量）
+ */
+export async function getSummaryTasks(): Promise<SummaryTask[]> {
+  const tasks = await loadTasks();
+  return tasks.map(({ result: _result, ...rest }) => ({
+    ...rest,
+    hasResult: Boolean(_result),
+  }));
+}
+
+/**
+ * 获取单个任务的完整结果
+ */
+export async function getSummaryTaskResult(taskId: string): Promise<{ task: SummaryTask; result?: string } | null> {
+  const tasks = await loadTasks();
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task) return null;
+
+  const { result, ...meta } = task;
+  return { task: { ...meta, hasResult: Boolean(result) }, result };
 }

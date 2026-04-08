@@ -35,14 +35,14 @@ function buildMeta(detail: SnippetGroupDetail): string {
   ]
     .filter(Boolean)
     .map((part) => `<span>${escapeHtml(String(part))}</span>`)
-    .join(' · ');
+    .join('·');
 }
 
 function renderStats(detail: SnippetGroupDetail): string {
   const snippet = detail.group;
   return [
     `Selections: ${detail.items.length || snippet.selectionCount || 0}`,
-    snippet.headingPath?.length ? `Headings: ${snippet.headingPath.join(' / ')}` : '',
+    snippet.headingPath?.length ? `Headings: ${snippet.headingPath.join('/')}` : '',
     snippet.blockKind ? `Block: ${snippet.blockKind}` : '',
     snippet.dwellMs ? `Dwell: ${Math.round(snippet.dwellMs / 1000)}s` : '',
     snippet.media?.kind ? `Media: ${snippet.media.kind}` : '',
@@ -75,7 +75,7 @@ function renderItem(item: SnippetItem, index: number): string {
         <div class="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            class="snippet-item-focus px-2 py-1 text-xs rounded bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] hover:bg-[rgba(94,106,210,0.12)]"
+            class="snippet-item-focus px-2 py-1 text-xs rounded bg-brand-light text-brand "
             data-item-id="${escapeHtml(item.id)}"
           >
             定位

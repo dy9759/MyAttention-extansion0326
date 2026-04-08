@@ -62,7 +62,7 @@ export class MediaSaveOverlay {
     this.element.type = 'button';
     this.element.className = 'sayso-media-save-overlay';
     this.element.setAttribute('data-sayso-media-overlay', 'true');
-    this.element.setAttribute('aria-label', 'Save media to SaySo-attention');
+    this.element.setAttribute('aria-label', 'Save media to My Attention');
     this.element.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M12 4v10m0 0 4-4m-4 4-4-4M5 18h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaySo-attention</title>
+  <title>My Attention</title>
   <link href="../lib/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../lib/fontawesome/all.min.css">
   <style>
@@ -99,6 +99,18 @@
     }
     
     /* 统一的平台标签样式 */
+    /* Linear brand utility classes (Tailwind JIT not available) */
+    .btn-brand { background-color: #5e6ad2; color: #fff; }
+    .btn-brand:hover { background-color: #7170ff; }
+    .btn-brand-light { background-color: rgba(94,106,210,0.08); color: #5e6ad2; }
+    .btn-brand-light:hover { background-color: rgba(94,106,210,0.12); }
+    .text-brand { color: #5e6ad2; }
+    .text-brand-hover:hover { color: #5e6ad2; }
+    .text-brand-light { color: #828fff; }
+    .bg-brand-light { background-color: rgba(94,106,210,0.08); }
+    .border-brand { border-color: rgba(94,106,210,0.2); }
+    .ring-brand:focus { --tw-ring-color: #5e6ad2; }
+
     .attention-pill {
       font-weight: 500;
       letter-spacing: -0.01em;
@@ -701,7 +713,7 @@
     <div id="attention-content" class="tab-content active flex-1 flex flex-col p-2">
       <!-- 第一行：导航筛选 pills -->
       <div id="attention-filter-pills" class="flex items-center gap-1 mb-2">
-        <button data-filter="all" class="attention-pill active px-3 py-1 text-xs font-medium rounded-full bg-[#5e6ad2] text-white transition-colors">全部</button>
+        <button data-filter="all" class="attention-pill active px-3 py-1 text-xs font-medium rounded-full btn-brand text-white transition-colors">全部</button>
         <button data-filter="aichat" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">AIChat</button>
         <button data-filter="highlight" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">划词</button>
         <button data-filter="dwell" class="attention-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">停留</button>
@@ -726,7 +738,7 @@
           </button>
           <button
             id="save-current-page-snippet"
-            class="px-2 py-1.5 text-xs font-medium bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] rounded-lg hover:bg-[rgba(94,106,210,0.12)] transition-colors whitespace-nowrap"
+            class="px-2 py-1.5 text-xs font-medium bg-brand-light text-brand rounded-lg transition-colors whitespace-nowrap"
             data-i18n="saveCurrentPage"
           >
             保存当前页
@@ -737,7 +749,7 @@
           <input 
             type="text" 
             id="search-input" 
-            class="w-full pl-8 pr-16 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent transition-all duration-200" 
+            class="w-full pl-8 pr-16 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 ring-brand focus:border-transparent transition-all duration-200" 
             data-i18n-placeholder="searchPlaceholder" 
             placeholder="搜索对话标题或内容..."
           >
@@ -755,7 +767,7 @@
             </button>
             <button 
               id="filter-toggle" 
-              class="p-1 mr-2 flex items-center text-gray-400 hover:text-[#5e6ad2] hover:bg-[rgba(94,106,210,0.08)] rounded transition-all duration-200 relative"
+              class="p-1 mr-2 flex items-center text-gray-400 hover:text-brand hover:bg-brand-light rounded transition-all duration-200 relative"
               data-i18n-title="filter"
               title="筛选"
             >
@@ -775,8 +787,8 @@
               
               <!-- 快捷日期选项 -->
               <div class="flex flex-wrap gap-2 mb-3 items-center">
-                <button id="date-week" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-[rgba(94,106,210,0.12)] hover:text-[#5e6ad2] rounded transition-all duration-200" data-i18n="lastWeek">最近一周</button>
-                <button id="date-month" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-[rgba(94,106,210,0.12)] hover:text-[#5e6ad2] rounded transition-all duration-200" data-i18n="lastMonth">最近一月</button>
+                <button id="date-week" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:text-brand rounded transition-all duration-200" data-i18n="lastWeek">最近一周</button>
+                <button id="date-month" class="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:text-brand rounded transition-all duration-200" data-i18n="lastMonth">最近一月</button>
               </div>
               
               <!-- 日期输入框 -->
@@ -787,7 +799,7 @@
                     <input 
                       type="text" 
                       id="start-date" 
-                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent cursor-pointer"
+                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 ring-brand focus:border-transparent cursor-pointer"
                       placeholder="yyyy/mm/dd"
                       readonly
                     >
@@ -848,7 +860,7 @@
                         <div class="date-grid grid grid-cols-7 gap-1"></div>
                         <!-- 底部按钮 -->
                         <div class="flex justify-center mt-3 pt-2 border-t border-gray-100">
-                          <button type="button" class="date-today-btn text-xs text-[#5e6ad2] hover:text-[#4a55b0] font-medium">今天</button>
+                          <button type="button" class="date-today-btn text-xs text-brand hover:text-brand font-medium">今天</button>
                         </div>
                       </div>
                     </div>
@@ -860,7 +872,7 @@
                     <input 
                       type="text" 
                       id="end-date" 
-                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent cursor-pointer"
+                      class="w-full px-3 py-2 pr-3 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 ring-brand focus:border-transparent cursor-pointer"
                       placeholder="yyyy/mm/dd"
                       readonly
                     >
@@ -921,7 +933,7 @@
                         <div class="date-grid grid grid-cols-7 gap-1"></div>
                         <!-- 底部按钮 -->
                         <div class="flex justify-center mt-3 pt-2 border-t border-gray-100">
-                          <button type="button" class="date-today-btn text-xs text-[#5e6ad2] hover:text-[#4a55b0] font-medium">今天</button>
+                          <button type="button" class="date-today-btn text-xs text-brand hover:text-brand font-medium">今天</button>
                         </div>
                       </div>
                     </div>
@@ -937,7 +949,7 @@
                 <!-- 已选择的平台标签容器 -->
                 <div 
                   id="platform-tags-container" 
-                  class="min-h-[2.5rem] w-full px-3 py-2 bg-white border border-gray-300 rounded-md transition-all duration-200 cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:border-transparent"
+                  class="min-h-[2.5rem] w-full px-3 py-2 bg-white border border-gray-300 rounded-md transition-all duration-200 cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 ring-brand focus:border-transparent"
                   tabindex="0"
                 >
                   <div id="platform-tags" class="flex flex-wrap gap-1 items-center">
@@ -957,7 +969,7 @@
             <div class="flex gap-2 pt-0">
               <button 
                 id="apply-filter" 
-                class="flex-1 px-4 py-2 text-xs font-medium bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] rounded-md hover:bg-[rgba(94,106,210,0.12)] focus:outline-none focus:ring-2 focus:ring-[#5e6ad2] focus:ring-offset-1 transition-all duration-200"
+                class="flex-1 px-4 py-2 text-xs font-medium bg-brand-light text-brand rounded-md focus:outline-none focus:ring-2 ring-brand focus:ring-offset-1 transition-all duration-200"
                 data-i18n="applyFilter"
               >
                 <i class="fas fa-check mr-1"></i>应用筛选
@@ -974,15 +986,15 @@
         </div>
         
         <!-- 搜索结果信息栏 -->
-        <div id="search-result-info" class="hidden mt-2 flex items-center justify-between bg-[rgba(94,106,210,0.08)] border border-[rgba(94,106,210,0.2)] rounded-md px-2 py-1">
-          <div class="flex items-center text-xs text-[#5e6ad2]">
+        <div id="search-result-info" class="hidden mt-2 flex items-center justify-between bg-brand-light border border-brand rounded-md px-2 py-1">
+          <div class="flex items-center text-xs text-brand">
             <i class="fas fa-info-circle mr-1.5 text-xs"></i>
             <span id="result-count-text" data-i18n="foundItems" data-i18n-args='{"count": 0}'>找到 0 条</span>
           </div>
           <div class="flex items-center gap-1.5">
             <button 
               id="multi-select-toggle" 
-              class="px-2 py-1 text-xs text-gray-500 rounded hover:bg-[rgba(94,106,210,0.12)] hover:text-[#5e6ad2] focus:outline-none transition-all duration-200 flex items-center gap-1"
+              class="px-2 py-1 text-xs text-gray-500 rounded hover:text-brand focus:outline-none transition-all duration-200 flex items-center gap-1"
               data-i18n-title="multiSelectMode"
             >
               <i class="fas fa-tasks text-xs"></i>
@@ -991,7 +1003,7 @@
             <div class="relative">
               <button 
                 id="export-filtered-btn" 
-                class="px-2 py-1 text-xs font-medium bg-[#5e6ad2] text-white rounded hover:bg-[#5e6ad2] focus:outline-none transition-all duration-200 flex items-center gap-1 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                class="px-2 py-1 text-xs font-medium btn-brand text-white rounded hover:btn-brand focus:outline-none transition-all duration-200 flex items-center gap-1 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 data-i18n-title="exportFilterResults"
               >
                 <i class="fas fa-download text-xs"></i>
@@ -1054,12 +1066,12 @@
       <!-- 头部信息区，固定在顶部 -->
       <div class="sticky top-0 z-10 bg-white border-b pb-2">
         <div class="flex items-center p-3 pb-2">
-          <button id="back-to-list" class="text-[#5e6ad2] mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
+          <button id="back-to-list" class="text-brand mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
             <i class="fas fa-arrow-left"></i>
           </button>
           <div class="flex-1 flex items-center min-w-0 mr-2">
             <h2 id="detail-title" class="text-lg font-medium truncate cursor-pointer flex-1 min-w-0"></h2>
-            <input id="detail-title-input" class="text-lg font-medium bg-transparent border border-[rgba(94,106,210,0.25)] rounded px-2 py-1 outline-none focus:border-[#5e6ad2] hidden flex-1 min-w-0" type="text">
+            <input id="detail-title-input" class="text-lg font-medium bg-transparent border border-brand rounded px-2 py-1 outline-none focus:border-brand hidden flex-1 min-w-0" type="text">
           </div>
           <button id="edit-title" class="text-gray-500 hover:bg-gray-100 rounded flex-shrink-0 transition-colors w-8 h-8 flex items-center justify-center">
             <i id="edit-title-icon" class="fas fa-edit"></i>
@@ -1112,7 +1124,7 @@
     <div id="snippet-detail" class="tab-content hidden flex-1 flex flex-col">
       <div class="sticky top-0 z-10 bg-white border-b pb-2">
         <div class="flex items-center p-3 pb-2">
-          <button id="back-to-snippets" class="text-[#5e6ad2] mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
+          <button id="back-to-snippets" class="text-brand mr-2 hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
             <i class="fas fa-arrow-left"></i>
           </button>
           <div class="flex-1 min-w-0">
@@ -1174,7 +1186,7 @@
         <input id="title-input" type="text" class="w-full border rounded p-2 mb-4" data-i18n="inputNewTitle" placeholder="输入新标题">
         <div class="flex justify-end space-x-2">
           <button id="cancel-edit" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100" data-i18n="cancel">取消</button>
-          <button id="save-title" class="px-4 py-2 bg-[#5e6ad2] text-white rounded hover:bg-[#5e6ad2]" data-i18n="save">保存</button>
+          <button id="save-title" class="px-4 py-2 btn-brand text-white rounded hover:btn-brand" data-i18n="save">保存</button>
         </div>
       </div>
     </div>
@@ -1202,43 +1214,47 @@
 
       <!-- 模式选择 -->
       <div class="flex items-center gap-2 mb-3">
-        <button data-summary-mode="weekly" class="summary-mode-pill active px-3 py-1 text-xs font-medium rounded-full bg-[#5e6ad2] text-white transition-colors">AI 互动周报</button>
+        <button data-summary-mode="weekly" class="summary-mode-pill active px-3 py-1 text-xs font-medium rounded-full btn-brand text-white transition-colors">AI 互动周报</button>
         <button data-summary-mode="topic" class="summary-mode-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">主题复盘</button>
         <button data-summary-mode="psychology" class="summary-mode-pill px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">心理洞察</button>
       </div>
 
       <!-- 主题输入（仅 topic 模式） -->
       <div id="topic-input-group" class="hidden mb-3">
-        <input id="summary-topic-input" type="text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[rgba(94,106,210,0.15)] focus:border-[rgba(94,106,210,0.25)]" placeholder="输入要复盘的主题，如：产品设计、AI Agent...">
+        <input id="summary-topic-input" type="text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ring-brand focus:border-brand" placeholder="输入要复盘的主题，如：产品设计、AI Agent...">
       </div>
 
       <!-- 生成按钮 -->
-      <button id="generate-summary-btn" class="w-full py-2.5 text-sm font-medium bg-[#5e6ad2] text-white rounded-lg hover:bg-[#5e6ad2] transition-colors mb-3 flex items-center justify-center gap-2">
+      <button id="generate-summary-btn" class="w-full py-2.5 text-sm font-medium btn-brand text-white rounded-lg hover:btn-brand transition-colors mb-3 flex items-center justify-center gap-2">
         <i class="fas fa-magic"></i>
         <span>生成总结</span>
       </button>
 
-      <!-- 加载状态 -->
-      <div id="summary-loading" class="hidden flex-1 flex items-center justify-center">
-        <div class="text-center">
-          <i class="fas fa-spinner fa-spin text-2xl text-[#828fff] mb-2"></i>
-          <p class="text-sm text-gray-500">正在分析你的注意力数据...</p>
-          <p class="text-xs text-gray-400 mt-1">这可能需要 10-30 秒</p>
+      <!-- 任务列表 -->
+      <div id="summary-task-list" class="flex-1 overflow-y-auto">
+        <div class="grid gap-2 grid-cols-1 pb-2">
+          <!-- 动态渲染 -->
         </div>
       </div>
 
-      <!-- 结果展示 -->
-      <div id="summary-result" class="hidden flex-1 overflow-y-auto">
-        <div id="summary-result-content" class="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed prose-sm"></div>
-      </div>
-
       <!-- 空状态 -->
-      <div id="summary-empty" class="flex-1 flex items-center justify-center">
+      <div id="summary-empty" class="hidden flex-1 flex items-center justify-center">
         <div class="text-center">
           <i class="fas fa-brain text-4xl text-gray-300 mb-3"></i>
           <p class="text-gray-500 mb-2">选择分析模式，点击生成</p>
           <p class="text-xs text-gray-400">需要在设置页配置 LLM API Key</p>
         </div>
+      </div>
+
+      <!-- 任务结果详情（覆盖列表） -->
+      <div id="summary-result-view" class="hidden flex-1 flex flex-col overflow-hidden">
+        <div class="flex items-center gap-2 mb-3">
+          <button id="summary-result-back" class="text-brand hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <span id="summary-result-title" class="text-sm font-medium text-gray-800"></span>
+        </div>
+        <div id="summary-result-content" class="flex-1 overflow-y-auto bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed"></div>
       </div>
     </div>
 
@@ -1250,10 +1266,10 @@
       </div>
 
       <!-- 探索方向 -->
-      <div id="explore-directions" class="bg-[rgba(94,106,210,0.08)] rounded-lg border border-[rgba(94,106,210,0.15)] p-3 mb-3">
-        <span class="text-xs font-medium text-[#5e6ad2] block mb-2"><i class="fas fa-compass mr-1"></i>探索方向</span>
+      <div id="explore-directions" class="bg-brand-light rounded-lg border border-brand p-3 mb-3">
+        <span class="text-xs font-medium text-brand block mb-2"><i class="fas fa-compass mr-1"></i>探索方向</span>
         <div id="directions-list" class="flex flex-wrap gap-2">
-          <span class="text-xs text-[#828fff] italic">请先在总结页生成关键词</span>
+          <span class="text-xs text-brand-light italic">请先在总结页生成关键词</span>
         </div>
       </div>
 
@@ -1329,7 +1345,7 @@
             <label class="block text-xs font-medium text-gray-600 mb-1">模型</label>
             <input id="llm-model" type="text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="qwen-plus" value="qwen-plus">
           </div>
-          <button id="save-llm-config" class="w-full py-2 text-xs font-medium bg-[#5e6ad2] text-white rounded-lg hover:bg-[#5e6ad2] transition-colors">
+          <button id="save-llm-config" class="w-full py-2 text-xs font-medium btn-brand text-white rounded-lg hover:btn-brand transition-colors">
             保存 LLM 配置
           </button>
           <div id="llm-config-status" class="text-xs text-gray-500 text-center hidden"></div>
@@ -1457,13 +1473,13 @@
           </div>
           
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div id="storage-bar" class="bg-[#5e6ad2] h-2 rounded-full transition-all" style="width: 0%"></div>
+            <div id="storage-bar" class="btn-brand h-2 rounded-full transition-all" style="width: 0%"></div>
           </div>
           
           <div class="space-y-2">
             <div class="flex gap-2">
               <div class="flex-1 relative">
-                <button id="export-btn" class="w-full bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] px-3 py-2 rounded-lg text-sm font-medium hover:bg-[rgba(94,106,210,0.12)] transition-colors flex items-center justify-center relative">
+                <button id="export-btn" class="w-full bg-brand-light text-brand px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center relative">
                   <i class="fas fa-download mr-1.5"></i><span data-i18n="exportData">导出数据</span>
                   <i class="fas fa-chevron-down text-xs absolute right-3"></i>
                 </button>
@@ -1538,7 +1554,7 @@
             </button>
             <button
               id="local-store-retry-migration"
-              class="flex-1 bg-[rgba(94,106,210,0.08)] text-[#5e6ad2] px-3 py-2 rounded-lg text-xs font-medium hover:bg-[rgba(94,106,210,0.12)] transition-colors"
+              class="flex-1 bg-brand-light text-brand px-3 py-2 rounded-lg text-xs font-medium transition-colors"
             >
               重试迁移
             </button>
@@ -1604,7 +1620,7 @@
         </div>
         <h3 class="text-lg font-medium text-gray-900 mb-2" data-i18n="confirmClearAllData">确认清空所有数据？</h3>
         <p class="text-sm text-gray-500 mb-2" data-i18n="clearDataWarning">此操作将永久删除所有保存的对话记录，且无法恢复。</p>
-        <p class="text-sm text-[#5e6ad2] mb-6" data-i18n="refreshPageAfterClear">清空完成后，请刷新网页以确保数据同步。</p>
+        <p class="text-sm text-brand mb-6" data-i18n="refreshPageAfterClear">清空完成后，请刷新网页以确保数据同步。</p>
         <div class="flex gap-3">
           <button id="cancel-clear" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" data-i18n="cancel">
             取消

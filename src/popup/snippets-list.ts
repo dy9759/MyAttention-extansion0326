@@ -187,7 +187,7 @@ export function renderSnippetCards(
         </div>
         <div class="flex items-center gap-1 flex-shrink-0">
           <span class="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-700">${escapeHtml(typeLabel)}</span>
-          <span class="text-[10px] px-2 py-1 rounded-full bg-[rgba(94,106,210,0.08)] text-[#5e6ad2]">${escapeHtml(sourceLabel)}</span>
+          <span class="text-[10px] px-2 py-1 rounded-full bg-brand-light text-brand">${escapeHtml(sourceLabel)}</span>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap mb-2">

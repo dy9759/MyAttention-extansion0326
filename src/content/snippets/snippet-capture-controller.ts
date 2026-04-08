@@ -563,7 +563,7 @@ export class SnippetCaptureController {
         snippet,
       });
       this.options.onSnippetSaved?.(snippet);
-      showSnippetToast('SaySo-attention 已记录');
+      showSnippetToast('My Attention 已记录');
       Logger.info('[SnippetCapture] 已保存片段:', snippet.type, snippet.url);
     } catch (error) {
       if (isRuntimeStale(error)) {
@@ -573,8 +573,8 @@ export class SnippetCaptureController {
       const message = toErrorMessage(error);
       Logger.error('[SnippetCapture] 保存片段失败:', error);
       showSnippetToast(message.includes('Restart local-store')
-        ? 'SaySo-attention 记录失败，请重启 local-store'
-        : 'SaySo-attention 记录失败');
+        ? 'My Attention 记录失败，请重启 local-store'
+        : 'My Attention 记录失败');
       throw error;
     }
   }
@@ -600,7 +600,7 @@ export class SnippetCaptureController {
       }
 
       this.options.onSnippetSaved?.(result.group);
-      showSnippetToast('SaySo-attention 已记录');
+      showSnippetToast('My Attention 已记录');
       Logger.info('[SnippetCapture] 已保存划词片段:', result.group.id, result.item.id);
     } catch (error) {
       if (isRuntimeStale(error)) {
@@ -610,8 +610,8 @@ export class SnippetCaptureController {
       const message = toErrorMessage(error);
       Logger.error('[SnippetCapture] 保存划词片段失败:', error);
       showSnippetToast(message.includes('Restart local-store')
-        ? 'SaySo-attention 记录失败，请重启 local-store'
-        : 'SaySo-attention 记录失败');
+        ? 'My Attention 记录失败，请重启 local-store'
+        : 'My Attention 记录失败');
       throw error;
     }
   }

@@ -312,7 +312,7 @@ function getStorageBarColor(percent: number): string {
   if (percent > 60) {
     return 'bg-yellow-600 h-2 rounded-full transition-all';
   }
-  return 'bg-[#5e6ad2] h-2 rounded-full transition-all';
+  return 'btn-brand h-2 rounded-full transition-all';
 }
 
 function closeExportDropdown(): void {
@@ -558,7 +558,7 @@ function renderLocalStoreStatus(
   }
 
   if (elements.localStoreLastError) {
-    const combinedError = [hubStatus?.lastError, status.lastError].filter(Boolean).join(' | ');
+    const combinedError = [hubStatus?.lastError, status.lastError].filter(Boolean).join('|');
     if (combinedError) {
       const syncText = status.lastSyncAt ? ` | 上次同步：${status.lastSyncAt}` : '';
       elements.localStoreLastError.textContent = `最近错误：${combinedError}${syncText}`;

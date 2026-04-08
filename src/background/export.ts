@@ -148,7 +148,7 @@ export class ExportManager {
     conversations: Conversation[],
     metadata: ExportMetadata
   ): string {
-    let content = `# SaySo-attention - All Conversations\n`;
+    let content = `# My Attention - All Conversations\n`;
     content += `Export Time: ${this.formatDateTimeForDisplay(new Date())}\n`;
     content += `Total Conversations: ${conversations.length}\n`;
 

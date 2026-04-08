@@ -8,14 +8,14 @@ function renderInline(text: string): string {
   html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   html = html.replace(
     /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noreferrer" class="text-[#5e6ad2] underline">$1</a>'
+    '<a href="$2" target="_blank" rel="noreferrer" class="text-brand underline">$1</a>'
   );
 
   return html;
 }
 
 function renderParagraph(lines: string[]): string {
-  const text = lines.join(' ').trim();
+  const text = lines.join('').trim();
   if (!text) {
     return '';
   }

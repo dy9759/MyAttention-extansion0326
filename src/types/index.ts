@@ -72,8 +72,10 @@ export type KnownChromeMessageType =
   // History
   | 'getBrowsingHistory'
   | 'refreshBrowsingHistory'
-  // Summary
-  | 'generateSummary';
+  // Summary tasks
+  | 'createSummaryTask'
+  | 'getSummaryTasks'
+  | 'getSummaryTaskResult';
 
 export type ChromeMessageType = KnownChromeMessageType;
 
