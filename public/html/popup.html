@@ -1249,21 +1249,18 @@
       <!-- 任务结果详情（覆盖列表） -->
       <div id="summary-result-view" class="hidden flex-1 flex flex-col overflow-hidden">
         <div class="flex items-center gap-2 mb-3">
-          <button id="summary-result-back" class="text-brand hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center">
+          <button id="summary-result-back" class="text-brand hover:bg-gray-100 rounded w-8 h-8 flex items-center justify-center flex-shrink-0">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <span id="summary-result-title" class="text-sm font-medium text-gray-800"></span>
-        </div>
-        <div id="summary-result-content" class="flex-1 min-h-0 overflow-y-auto bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed"></div>
-        <div class="mt-3 flex justify-end flex-shrink-0">
+          <span id="summary-result-title" class="text-sm font-medium text-gray-800 flex-1 min-w-0 truncate"></span>
           <button
             id="summary-to-recommend-btn"
-            class="bg-brand text-white px-3 py-1.5 rounded text-sm hover:opacity-90 hidden"
+            class="bg-brand text-white px-2 py-1 rounded text-xs hover:opacity-90 hidden flex-shrink-0 whitespace-nowrap"
           >
-            <i class="fas fa-compass mr-1"></i>
-            基于此报告推荐源头
+            <i class="fas fa-compass mr-1"></i>基于此报告推荐源头
           </button>
         </div>
+        <div id="summary-result-content" class="flex-1 min-h-0 overflow-y-auto bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed"></div>
       </div>
     </div>
 
