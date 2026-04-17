@@ -568,6 +568,9 @@ export function initPopup() {
     // 初始化 LLM 设置
     initializeLlmSettings();
 
+    // 初始化推荐设置
+    initializeRecommendSettings();
+
     // 监听存储变化
     setupStorageChangeListener();
 
@@ -1713,6 +1716,41 @@ function initializeLlmSettings(): void {
       });
     });
   });
+}
+
+// ============================================================================
+// 推荐设置
+// ============================================================================
+
+function clamp(n: number, min: number, max: number): number {
+  if (Number.isNaN(n)) return min;
+  return Math.max(min, Math.min(max, n));
+}
+
+function initializeRecommendSettings(): void {
+  const saveBtn = settingsElements.recommendSaveBtn;
+  const statusEl = settingsElements.recommendSaveStatus;
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      const enabled = settingsElements.recommendEnabledToggle?.checked ?? false;
+      const exaApiKey = (settingsElements.recommendExaKey?.value ?? '').trim();
+      const dataWindowDays = clamp(parseInt(settingsElements.recommendWindowDays?.value ?? '14', 10), 1, 30);
+      const cacheTtlHours = clamp(parseInt(settingsElements.recommendCacheHours?.value ?? '24', 10), 1, 168);
+
+      await chrome.runtime.sendMessage({
+        type: 'updateSettings',
+        settings: {
+          recommend: { enabled, exaApiKey, dataWindowDays, cacheTtlHours },
+        },
+      });
+
+      if (statusEl) {
+        statusEl.classList.remove('hidden');
+        setTimeout(() => statusEl.classList.add('hidden'), 2000);
+      }
+    });
+  }
 }
 
 function switchTab(tabName: 'attention' | 'summary' | 'recommend' | 'settings'): void {

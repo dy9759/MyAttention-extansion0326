@@ -1352,6 +1352,67 @@
         </div>
       </div>
 
+      <!-- 推荐配置 -->
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-3">
+        <h3 class="text-sm font-medium mb-4 flex items-center">
+          <i class="fas fa-compass mr-2 text-gray-500"></i>
+          <span>推荐</span>
+        </h3>
+
+        <label class="flex items-center justify-between mb-3">
+          <span class="text-sm text-gray-700">启用推荐</span>
+          <input type="checkbox" id="recommend-enabled-toggle" class="toggle" />
+        </label>
+
+        <div class="mb-3">
+          <label for="recommend-exa-key" class="block text-xs text-gray-600 mb-1">
+            Exa API Key
+          </label>
+          <input
+            type="password"
+            id="recommend-exa-key"
+            placeholder="请输入 Exa API Key"
+            class="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+          />
+          <p class="text-xs text-gray-400 mt-1">
+            获取 Key: <a href="https://exa.ai" target="_blank" class="text-brand underline">exa.ai</a>
+          </p>
+        </div>
+
+        <div class="mb-3">
+          <label for="recommend-window-days" class="block text-xs text-gray-600 mb-1">
+            数据窗口天数 (1-30)
+          </label>
+          <input
+            type="number"
+            id="recommend-window-days"
+            min="1"
+            max="30"
+            value="14"
+            class="w-24 px-2 py-1 text-sm border border-gray-300 rounded"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="recommend-cache-hours" class="block text-xs text-gray-600 mb-1">
+            结果缓存时长 (小时)
+          </label>
+          <input
+            type="number"
+            id="recommend-cache-hours"
+            min="1"
+            max="168"
+            value="24"
+            class="w-24 px-2 py-1 text-sm border border-gray-300 rounded"
+          />
+        </div>
+
+        <button id="recommend-save-btn" class="bg-brand text-white px-3 py-1.5 rounded text-sm hover:opacity-90">
+          保存推荐配置
+        </button>
+        <span id="recommend-save-status" class="ml-2 text-xs text-green-600 hidden">已保存</span>
+      </div>
+
       <div class="bg-white rounded-lg shadow-sm p-4 mb-3">
         <h3 class="text-sm font-medium mb-4 flex items-center">
           <i class="fas fa-highlighter mr-2 text-gray-500"></i><span data-i18n="webCaptureSettings">网页采集</span>

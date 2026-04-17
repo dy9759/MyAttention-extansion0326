@@ -53,6 +53,12 @@ export const elements = {
   browserSyncLastError: document.getElementById('browser-sync-last-error'),
   localStoreChangePath: document.getElementById('local-store-change-path') as HTMLButtonElement | null,
   localStoreRetryMigration: document.getElementById('local-store-retry-migration') as HTMLButtonElement | null,
+  recommendEnabledToggle: document.getElementById('recommend-enabled-toggle') as HTMLInputElement | null,
+  recommendExaKey: document.getElementById('recommend-exa-key') as HTMLInputElement | null,
+  recommendWindowDays: document.getElementById('recommend-window-days') as HTMLInputElement | null,
+  recommendCacheHours: document.getElementById('recommend-cache-hours') as HTMLInputElement | null,
+  recommendSaveBtn: document.getElementById('recommend-save-btn') as HTMLButtonElement | null,
+  recommendSaveStatus: document.getElementById('recommend-save-status') as HTMLElement | null,
 };
 
 let localStoreSnapshot: LocalStoreStatus | null = null;
@@ -265,6 +271,19 @@ export function updateUI(settings: AppSettings): void {
   }
   if (elements.llmStructuringToggle) {
     elements.llmStructuringToggle.checked = settings.webCapture?.llmStructuringEnabled !== false;
+  }
+
+  if (elements.recommendEnabledToggle) {
+    elements.recommendEnabledToggle.checked = settings.recommend?.enabled ?? false;
+  }
+  if (elements.recommendExaKey) {
+    elements.recommendExaKey.value = settings.recommend?.exaApiKey ?? '';
+  }
+  if (elements.recommendWindowDays) {
+    elements.recommendWindowDays.value = String(settings.recommend?.dataWindowDays ?? 14);
+  }
+  if (elements.recommendCacheHours) {
+    elements.recommendCacheHours.value = String(settings.recommend?.cacheTtlHours ?? 24);
   }
 
   updateStorageUsageDisplay();
