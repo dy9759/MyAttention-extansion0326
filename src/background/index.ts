@@ -24,6 +24,12 @@ import { localStoreSyncService } from './local-store-sync-service';
 import { FIRST_OPEN_WELCOME_PENDING_KEY } from '@/core/first-open';
 import { fetchBrowsingHistory } from './history-tracker';
 import { createSummaryTask, getSummaryTasks, getSummaryTaskResult } from './attention-summarizer';
+import {
+  createSession as createRecommendationSession,
+  getSession as getRecommendationSession,
+  markInteracted as markRecommendationInteracted,
+  sweepInterruptedSessions,
+} from './recommendation-engine';
 import { startTabMonitor, cleanupTabMonitor } from './tab-monitor';
 import { notifySummaryCompleted } from './myisland-client';
 
@@ -594,6 +600,43 @@ const messageHandlersMap: Record<
   'getSummaryTaskResult': async (params) => {
     return await getSummaryTaskResult(params.taskId);
   },
+
+  'createRecommendationSession': async (params) => {
+    const triggerSource = params.triggerSource === 'standalone' ? 'standalone' : 'from_summary';
+    let summaryText: string | undefined;
+    if (triggerSource === 'from_summary') {
+      if (!params.summaryTaskId) {
+        return { status: 'error', error: 'summaryTaskId is required for from_summary trigger' };
+      }
+      const taskResult = await getSummaryTaskResult(params.summaryTaskId);
+      if (!taskResult || !taskResult.result) {
+        return { status: 'error', error: 'summary task not found or has no result' };
+      }
+      summaryText = taskResult.result;
+    } else {
+      return { status: 'error', error: 'standalone trigger is not supported in M1' };
+    }
+    return createRecommendationSession({
+      triggerSource,
+      summaryTaskId: params.summaryTaskId,
+      summaryText,
+    });
+  },
+
+  'getRecommendationSession': async (params) => {
+    const session = await getRecommendationSession(params?.sessionId);
+    return { session };
+  },
+
+  'markRecommendationInteracted': async (params) => {
+    await markRecommendationInteracted({
+      sessionId: params.sessionId,
+      cardId: params.cardId,
+      action: params.action,
+      savedSnippetId: params.savedSnippetId,
+    });
+    return { status: 'ok' };
+  },
 };
 
 function normalizeMessageResponse(result: any): any {
@@ -642,7 +685,7 @@ function setupMessageListeners(): void {
       }
 
       // LLM 调用等长时操作绕过 dispatcher 超时
-      const BYPASS_DISPATCHER_TYPES = new Set(['createSummaryTask']);
+      const BYPASS_DISPATCHER_TYPES = new Set(['createSummaryTask', 'createRecommendationSession']);
 
       const dispatchPromise = (ENABLE_MESSAGE_DISPATCHER && !BYPASS_DISPATCHER_TYPES.has(message.type))
         ? messageDispatcher.dispatch({
@@ -1012,6 +1055,12 @@ async function initialize(): Promise<void> {
 
     // 同步已有总结任务到 MyIsland（覆盖扩展安装前已完成的任务）
     void syncExistingTasksToMyIsland();
+
+    try {
+      await sweepInterruptedSessions();
+    } catch (error) {
+      Logger.warn('[Background] sweepInterruptedSessions 失败', error);
+    }
 
     Logger.info('[Background] 后台服务初始化完成');
   } catch (error) {
