@@ -195,6 +195,11 @@ export interface RunSessionParams {
   summaryText?: string;
 }
 
+/**
+ * Patch or create a session. M1 runs one session at a time per service worker,
+ * so this simple read-modify-write is safe. M2+ (standalone trigger + retry)
+ * will need serialization — a single Promise chain or a dedicated mutex.
+ */
 async function updateSession(
   sessionId: string,
   patch: Partial<RecommendationSession>
@@ -223,7 +228,10 @@ async function updateSession(
 
 export async function runRecommendationSession(params: RunSessionParams): Promise<void> {
   const { sessionId, triggerSource, summaryTaskId, summaryText } = params;
-  const createdAt = new Date().toISOString();
+
+  // Preserve original createdAt on retries — only set if session is new.
+  const existing = (await loadSessions()).find((s) => s.id === sessionId);
+  const createdAt = existing?.createdAt ?? new Date().toISOString();
 
   await updateSession(sessionId, {
     triggerSource,
@@ -338,7 +346,7 @@ export async function createSession(params: {
   summaryTaskId?: string;
   summaryText?: string;
 }): Promise<{ sessionId: string }> {
-  const sessionId = `rec_${Date.now()}`;
+  const sessionId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   void runRecommendationSession({
     sessionId,
     triggerSource: params.triggerSource,

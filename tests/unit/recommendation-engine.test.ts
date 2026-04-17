@@ -61,6 +61,7 @@ import {
   runRecommendationSession,
   sweepInterruptedSessions,
   loadSessions,
+  markInteracted,
 } from '@/background/recommendation-engine';
 
 describe('extractTopicsFromSummary', () => {
@@ -102,6 +103,24 @@ describe('extractTopicsFromSummary', () => {
       extractTopicsFromSummary('x', { provider: 'openai', apiKey: 'k' })
     ).rejects.toThrow(/JSON/);
 
+    expect(llmClientMock.callLlm).toHaveBeenCalledTimes(2);
+  });
+
+  it('succeeds on retry after first invalid JSON', async () => {
+    llmClientMock.callLlm
+      .mockResolvedValueOnce('garbage not json')
+      .mockResolvedValueOnce(JSON.stringify({
+        topics: [{
+          topic: 't', userEngagement: 'e', sourceIntent: 'official_doc',
+          searchQueries: ['q'], exaType: 'company',
+        }],
+      }));
+
+    const topics = await extractTopicsFromSummary('x', {
+      provider: 'openai', apiKey: 'k',
+    });
+
+    expect(topics).toHaveLength(1);
     expect(llmClientMock.callLlm).toHaveBeenCalledTimes(2);
   });
 });
@@ -199,5 +218,85 @@ describe('sweepInterruptedSessions', () => {
     expect(all.find((s) => s.id === 'a')!.error).toMatch(/中断/);
     expect(all.find((s) => s.id === 'b')!.status).toBe('searching');
     expect(all.find((s) => s.id === 'c')!.status).toBe('done');
+  });
+});
+
+describe('sourceKind derivation', () => {
+  beforeEach(() => {
+    llmClientMock.callLlm.mockReset();
+    exaClientModuleMock.searchMock.mockReset();
+    for (const k of Object.keys(chromeStorage)) delete chromeStorage[k];
+  });
+
+  it.each([
+    { url: 'https://arxiv.org/abs/1706.03762', exaType: 'research paper' as const, expected: 'paper' },
+    { url: 'https://www.nature.com/articles/x', exaType: undefined, expected: 'paper' },
+    { url: 'https://github.com/foo/bar', exaType: 'github' as const, expected: 'repo' },
+    { url: 'https://gitlab.com/foo/bar', exaType: undefined, expected: 'repo' },
+    { url: 'https://react.dev/docs/hooks', exaType: undefined, expected: 'official_doc' },
+    { url: 'https://docs.python.org/3/', exaType: undefined, expected: 'official_doc' },
+    { url: 'https://example.com/blog/post', exaType: undefined, expected: 'other' },
+  ])('maps $url to sourceKind=$expected', async ({ url, exaType, expected }) => {
+    llmClientMock.callLlm.mockResolvedValue(JSON.stringify({
+      topics: [{
+        topic: 't',
+        userEngagement: 'e',
+        sourceIntent: 'foundational_paper',
+        searchQueries: ['q'],
+        exaType,
+      }],
+    }));
+    exaClientModuleMock.searchMock.mockResolvedValue({
+      results: [{ title: 'T', url, text: 's' }],
+    });
+
+    await runRecommendationSession({
+      sessionId: `rec_skind_${expected}`,
+      triggerSource: 'from_summary',
+      summaryTaskId: 't',
+      summaryText: 'x',
+    });
+
+    const session = (await loadSessions()).find((s) => s.id === `rec_skind_${expected}`)!;
+    expect(session.cards[0].sourceKind).toBe(expected);
+  });
+});
+
+describe('markInteracted', () => {
+  beforeEach(() => {
+    for (const k of Object.keys(chromeStorage)) delete chromeStorage[k];
+  });
+
+  it('flips opened/saved/dismissed flags and stores savedSnippetId', async () => {
+    chromeStorage.recommendationSessions = [{
+      id: 's1',
+      status: 'done',
+      triggerSource: 'from_summary',
+      strategies: ['source_upstream'],
+      extractedTopics: [],
+      dataWindowDays: 14,
+      createdAt: new Date().toISOString(),
+      cards: [
+        { id: 'c1', topicKey: 't1', sourceKind: 'paper', title: 'T', url: 'u', snippet: 's', rationale: 'r', domain: 'd', opened: false, saved: false, dismissed: false },
+        { id: 'c2', topicKey: 't1', sourceKind: 'paper', title: 'T', url: 'u', snippet: 's', rationale: 'r', domain: 'd', opened: false, saved: false, dismissed: false },
+        { id: 'c3', topicKey: 't1', sourceKind: 'paper', title: 'T', url: 'u', snippet: 's', rationale: 'r', domain: 'd', opened: false, saved: false, dismissed: false },
+      ],
+    }];
+
+    await markInteracted({ sessionId: 's1', cardId: 'c1', action: 'opened' });
+    await markInteracted({ sessionId: 's1', cardId: 'c2', action: 'saved', savedSnippetId: 'snip_123' });
+    await markInteracted({ sessionId: 's1', cardId: 'c3', action: 'dismissed' });
+
+    const session = (await loadSessions())[0];
+    expect(session.cards.find((c) => c.id === 'c1')!.opened).toBe(true);
+    expect(session.cards.find((c) => c.id === 'c2')!.saved).toBe(true);
+    expect(session.cards.find((c) => c.id === 'c2')!.savedSnippetId).toBe('snip_123');
+    expect(session.cards.find((c) => c.id === 'c3')!.dismissed).toBe(true);
+  });
+
+  it('is a no-op when session or card is missing', async () => {
+    chromeStorage.recommendationSessions = [];
+    // Should not throw
+    await markInteracted({ sessionId: 'nope', cardId: 'c', action: 'opened' });
   });
 });
