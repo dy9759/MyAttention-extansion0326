@@ -1661,7 +1661,11 @@ async function viewSummaryResult(taskId: string, title: string): Promise<void> {
   const recommendBtn = document.getElementById('summary-to-recommend-btn') as HTMLButtonElement | null;
   if (recommendBtn) {
     recommendBtn.classList.remove('hidden');
-    recommendBtn.onclick = () => jumpToRecommendFromSummary(taskId);
+    recommendBtn.disabled = false;
+    recommendBtn.onclick = () => {
+      recommendBtn.disabled = true;
+      jumpToRecommendFromSummary(taskId);
+    };
   }
 }
 

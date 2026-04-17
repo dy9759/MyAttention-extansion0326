@@ -190,7 +190,7 @@ function buildCardElement(sessionId: string, card: RecommendationCard): HTMLElem
       },
     });
 
-    const savedSnippetId = snippetResp?.data?.group?.id ?? snippetResp?.group?.id;
+    const savedSnippetId = snippetResp?.data?.snippet?.id ?? snippetResp?.snippet?.id;
 
     await chrome.runtime.sendMessage({
       type: 'markRecommendationInteracted',
