@@ -72,6 +72,10 @@ export type KnownChromeMessageType =
   // History
   | 'getBrowsingHistory'
   | 'refreshBrowsingHistory'
+  // Recommendation
+  | 'createRecommendationSession'
+  | 'getRecommendationSession'
+  | 'markRecommendationInteracted'
   // Summary tasks
   | 'createSummaryTask'
   | 'getSummaryTasks'
@@ -182,6 +186,13 @@ export interface AppSettings {
     baseUrl?: string;
     model?: string;
   };
+  /** 推荐功能配置 */
+  recommend?: {
+    enabled: boolean;
+    exaApiKey: string;
+    dataWindowDays: number;
+    cacheTtlHours: number;
+  };
   /** 网页内容采集设置 */
   webCapture?: {
     enabled: boolean;
@@ -208,6 +219,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
     y: undefined,
     isEdgeDocked: false,
     dockedSide: 'right',
+  },
+  recommend: {
+    enabled: false,
+    exaApiKey: '',
+    dataWindowDays: 14,
+    cacheTtlHours: 24,
   },
   webCapture: {
     enabled: true,
@@ -428,3 +445,4 @@ export * from './conversation';
 export * from './platform';
 export * from './snippet';
 export * from './history';
+export * from './recommendation';
