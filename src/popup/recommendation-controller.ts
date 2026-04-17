@@ -24,7 +24,6 @@ const MAX_POLL_DURATION_MS = 90_000;
 
 let pollTimer: number | null = null;
 let pollStartedAt = 0;
-let activeSessionId: string | null = null;
 let lastTriggerParams: { triggerSource: 'from_summary'; summaryTaskId: string } | null = null;
 
 function getElements(): Elements {
@@ -59,7 +58,6 @@ function stopPolling(): void {
 
 function startPolling(sessionId: string): void {
   stopPolling();
-  activeSessionId = sessionId;
   pollStartedAt = Date.now();
   pollTimer = window.setInterval(() => {
     void pollOnce(sessionId);
@@ -145,7 +143,7 @@ function buildCardElement(sessionId: string, card: RecommendationCard): HTMLElem
     original_author: '✍️ 原作者',
     repo: '💻 仓库',
     other: '🔗 资源',
-  }[card.sourceKind];
+  }[card.sourceKind] ?? `🔗 ${card.sourceKind}`;
 
   wrapper.innerHTML = `
     <div class="text-xs text-gray-500 mb-1">${escapeHtml(sourceLabel)}</div>
