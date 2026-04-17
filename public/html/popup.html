@@ -1262,35 +1262,38 @@
     <div id="recommend-content" class="tab-content hidden flex-1 flex flex-col p-2">
       <div class="mb-3">
         <h2 class="text-sm font-semibold text-gray-800">发现注意力</h2>
-        <p class="text-xs text-gray-500">你不知道但需要知道的</p>
+        <p class="text-xs text-gray-500">源头信息推荐</p>
       </div>
 
-      <!-- 探索方向 -->
-      <div id="explore-directions" class="bg-brand-light rounded-lg border border-brand p-3 mb-3">
-        <span class="text-xs font-medium text-brand block mb-2"><i class="fas fa-compass mr-1"></i>探索方向</span>
-        <div id="directions-list" class="flex flex-wrap gap-2">
-          <span class="text-xs text-brand-light italic">请先在总结页生成关键词</span>
-        </div>
-      </div>
-
-      <!-- 推荐卡片列表 -->
-      <div id="recommend-loading" class="hidden flex-1 flex items-center justify-center">
-        <div class="text-center">
-          <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
-          <p class="text-gray-500 text-sm">获取推荐中...</p>
-        </div>
-      </div>
-
+      <!-- Empty -->
       <div id="recommend-empty" class="flex-1 flex items-center justify-center">
         <div class="text-center">
           <i class="fas fa-compass text-4xl text-gray-300 mb-3"></i>
           <p class="text-gray-500 mb-2">还没有推荐内容</p>
-          <p class="text-sm text-gray-400">总结页生成关键词后，这里会出现推荐</p>
+          <p class="text-sm text-gray-400">在总结页生成一份报告后，点击"基于此报告推荐源头"</p>
         </div>
       </div>
 
+      <!-- Loading -->
+      <div id="recommend-loading" class="hidden flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+          <p id="recommend-loading-text" class="text-gray-500 text-sm">处理中...</p>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="recommend-error" class="hidden flex-1 flex items-center justify-center">
+        <div class="text-center max-w-xs">
+          <i class="fas fa-exclamation-triangle text-2xl text-red-400 mb-2"></i>
+          <p id="recommend-error-text" class="text-red-600 text-sm mb-2"></p>
+          <button id="recommend-retry-btn" class="text-brand text-xs underline">重试</button>
+        </div>
+      </div>
+
+      <!-- Ready -->
       <div id="recommend-list" class="hidden flex-1 overflow-y-auto">
-        <div class="grid gap-2 grid-cols-1 pb-2"></div>
+        <div id="recommend-cards" class="grid gap-2 grid-cols-1 pb-2"></div>
       </div>
     </div>
 

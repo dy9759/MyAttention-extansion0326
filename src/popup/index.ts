@@ -113,6 +113,10 @@ import {
   type RuntimeDiagnosticsViewModel,
 } from './runtime-diagnostics';
 import { initializeFirstOpenOverlay } from './first-open-overlay';
+import {
+  onRecommendTabActivated,
+  onRecommendTabDeactivated,
+} from './recommendation-controller';
 
 // ============================================================================
 // 类型定义
@@ -150,6 +154,7 @@ interface EditTitleEvent {
 let cachedConversations: Conversation[] = [];
 let cachedSnippets: Snippet[] = [];
 let cachedHistory: BrowsingHistoryItem[] = [];
+let pendingRecommendParams: { triggerSource: 'from_summary'; summaryTaskId: string } | null = null;
 let snippetFilterState: SnippetFilterState = { ...DEFAULT_SNIPPET_FILTER_STATE };
 let snippetSelectionMode = false;
 const selectedSnippetIds = new Set<string>();
@@ -1798,6 +1803,14 @@ function switchTab(tabName: 'attention' | 'summary' | 'recommend' | 'settings'):
     enqueueRefresh('refreshBrowsingHistory');
     enqueueRefresh('refreshStorageStats');
   }
+
+  if (tabName === 'recommend') {
+    const params = pendingRecommendParams;
+    pendingRecommendParams = null;
+    void onRecommendTabActivated(params ?? undefined);
+  } else {
+    onRecommendTabDeactivated();
+  }
 }
 
 /**
@@ -2721,3 +2734,8 @@ if (document.readyState === 'loading') {
 // - 协调各子模块（设置、记忆列表、对话详情、搜索筛选）
 // - 处理后台消息和自定义事件
 // - 提供导出按钮下拉菜单管理（可选）
+
+export function jumpToRecommendFromSummary(summaryTaskId: string): void {
+  pendingRecommendParams = { triggerSource: 'from_summary', summaryTaskId };
+  switchTab('recommend');
+}
