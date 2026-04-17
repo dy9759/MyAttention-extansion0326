@@ -1542,9 +1542,11 @@ function showSummaryTaskList(): void {
   const listEl = document.getElementById('summary-task-list');
   const resultView = document.getElementById('summary-result-view');
   const emptyEl = document.getElementById('summary-empty');
+  const recommendBtn = document.getElementById('summary-to-recommend-btn');
   if (listEl) listEl.classList.remove('hidden');
   if (resultView) resultView.classList.add('hidden');
   if (emptyEl) emptyEl.classList.add('hidden');
+  if (recommendBtn) recommendBtn.classList.add('hidden');
 }
 
 function renderSummaryTaskList(tasks: any[]): void {
@@ -1654,6 +1656,12 @@ async function viewSummaryResult(taskId: string, title: string): Promise<void> {
     if (resultContent) {
       resultContent.innerHTML = `<p class="text-red-500">获取失败</p>`;
     }
+  }
+
+  const recommendBtn = document.getElementById('summary-to-recommend-btn') as HTMLButtonElement | null;
+  if (recommendBtn) {
+    recommendBtn.classList.remove('hidden');
+    recommendBtn.onclick = () => jumpToRecommendFromSummary(taskId);
   }
 }
 
